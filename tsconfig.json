@@ -1,0 +1,21 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "baseUrl": "./",
+    "outDir": "./dist/out-tsc",
+    "sourceMap": true,
+    "esModuleInterop": true,
+    "declaration": false,
+    "experimentalDecorators": true,
+    "resolveJsonModule": true,
+    "module": "es2020",
+    "moduleResolution": "bundler",
+    "importHelpers": true,
+    "target": "ES2022",
+    "useDefineForClassFields": false,
+    "skipLibCheck": true 
+  },
+  "angularCompilerOptions": {
+    "enableI18nLegacyMessageIdFormat": false,
+  }
+}
