@@ -6,6 +6,7 @@ import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { PaginationModule } from 'ngx-bootstrap/pagination';
 import { AccountService } from '../services/account.service';
+import Swal from 'sweetalert2';
 
 @Component({
     selector: 'app-account-list',
@@ -20,6 +21,7 @@ export class AccountListComponent implements OnInit {
 
     // Data
     accountList: any[] = [];
+    filteredList: any[] = [];
     pagedAccounts: any[] = [];
     selectedAccount: any;
     loginDetailsContent: string = '';
@@ -31,9 +33,15 @@ export class AccountListComponent implements OnInit {
     itemsPerPage: number = 10;
     isLoading: boolean = false;
 
+    // Search
+    searchTerm: string = '';
+
     // Auto generate
     isGenerating: boolean = false;
     generatedCount: number = 0;
+
+    // Multi-select
+    selectedIds: number[] = [];
 
     // Forms
     accountForm: FormGroup;
@@ -71,8 +79,7 @@ export class AccountListComponent implements OnInit {
         this.accountService.getAccounts().subscribe({
             next: (data) => {
                 this.accountList = data;
-                this.total = this.accountList.length;
-                this.updatePagedAccounts();
+                this.applyFilter();
                 this.isLoading = false;
             },
             error: (err) => {
@@ -82,10 +89,29 @@ export class AccountListComponent implements OnInit {
         });
     }
 
+    onSearch() {
+        this.page = 1;
+        this.applyFilter();
+    }
+
+    applyFilter() {
+        const term = this.searchTerm.toLowerCase().trim();
+        if (term) {
+            this.filteredList = this.accountList.filter(a =>
+                (a.name && a.name.toLowerCase().includes(term)) ||
+                (a.url && a.url.toLowerCase().includes(term))
+            );
+        } else {
+            this.filteredList = [...this.accountList];
+        }
+        this.total = this.filteredList.length;
+        this.updatePagedAccounts();
+    }
+
     updatePagedAccounts() {
         const startIndex = (this.page - 1) * this.itemsPerPage;
         const endIndex = startIndex + this.itemsPerPage;
-        this.pagedAccounts = this.accountList.slice(startIndex, endIndex);
+        this.pagedAccounts = this.filteredList.slice(startIndex, endIndex);
     }
 
     pageChanged(event: any) {
@@ -162,9 +188,8 @@ export class AccountListComponent implements OnInit {
         this.accountService.addAccount(newAccount).subscribe({
             next: (data) => {
                 this.accountList.unshift(data);
-                this.total = this.accountList.length;
                 this.page = 1;
-                this.updatePagedAccounts();
+                this.applyFilter();
                 this.isLoading = false;
                 this.addAccountModal?.hide();
             },
@@ -223,28 +248,101 @@ export class AccountListComponent implements OnInit {
         // Add logic later
     }
 
+    // ========== Multi-select ==========
+
+    toggleSelect(id: number) {
+        const idx = this.selectedIds.indexOf(id);
+        if (idx > -1) {
+            this.selectedIds.splice(idx, 1);
+        } else {
+            this.selectedIds.push(id);
+        }
+    }
+
+    isSelected(id: number): boolean {
+        return this.selectedIds.includes(id);
+    }
+
+    toggleSelectAll(event: any) {
+        if (event.target.checked) {
+            this.selectedIds = this.pagedAccounts.map(a => a.id);
+        } else {
+            this.selectedIds = [];
+        }
+    }
+
+    isAllSelected(): boolean {
+        return this.pagedAccounts.length > 0 && this.pagedAccounts.every(a => this.selectedIds.includes(a.id));
+    }
+
+    deleteSelected() {
+        if (this.selectedIds.length === 0) return;
+
+        Swal.fire({
+            title: 'Are you sure?',
+            text: `You are about to delete ${this.selectedIds.length} account(s). You won\'t be able to revert this!`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#34c38f',
+            cancelButtonColor: '#f46a6a',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const idsToDelete = [...this.selectedIds];
+                this.deleteSequentially(idsToDelete, 0);
+            }
+        });
+    }
+
+    private deleteSequentially(ids: number[], index: number) {
+        if (index >= ids.length) {
+            this.selectedIds = [];
+            this.fetchData();
+            Swal.fire('Deleted!', 'Selected accounts have been deleted.', 'success');
+            return;
+        }
+        this.accountService.deleteAccount(ids[index]).subscribe({
+            next: () => this.deleteSequentially(ids, index + 1),
+            error: (err) => {
+                console.error(`Error deleting account ${ids[index]}`, err);
+                this.deleteSequentially(ids, index + 1);
+            }
+        });
+    }
+
     /**
      * Delete account
      * @param id Account ID
      */
     deleteAccount(id: number) {
-        if (confirm('Are you sure you want to delete this account?')) {
-            this.accountService.deleteAccount(id).subscribe({
-                next: () => {
-                    this.accountList = this.accountList.filter(a => a.id !== id);
-                    this.total = this.accountList.length;
-                    // If current page is now empty, go back one page
-                    const maxPage = Math.ceil(this.total / this.itemsPerPage) || 1;
-                    if (this.page > maxPage) {
-                        this.page = maxPage;
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#34c38f',
+            cancelButtonColor: '#f46a6a',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                this.accountService.deleteAccount(id).subscribe({
+                    next: () => {
+                        this.accountList = this.accountList.filter(a => a.id !== id);
+                        this.applyFilter();
+                        const maxPage = Math.ceil(this.total / this.itemsPerPage) || 1;
+                        if (this.page > maxPage) {
+                            this.page = maxPage;
+                            this.updatePagedAccounts();
+                        }
+                        Swal.fire('Deleted!', 'Account has been deleted.', 'success');
+                    },
+                    error: (err) => {
+                        console.error('Error deleting account', err);
+                        Swal.fire('Error!', 'Failed to delete account.', 'error');
                     }
-                    this.updatePagedAccounts();
-                },
-                error: (err) => {
-                    console.error('Error deleting account', err);
-                }
-            });
-        }
+                });
+            }
+        });
     }
 
     /**

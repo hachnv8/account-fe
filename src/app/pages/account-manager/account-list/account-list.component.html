@@ -10,7 +10,7 @@
             <div class="col-sm-4">
               <div class="search-box me-2 mb-2 d-inline-block">
                 <div class="position-relative">
-                  <input type="text" class="form-control" placeholder="Search...">
+                  <input type="text" class="form-control" placeholder="Search by name or URL/IP..." [(ngModel)]="searchTerm" (ngModelChange)="onSearch()">
                   <i class="bx bx-search-alt search-icon"></i>
                 </div>
               </div>
@@ -26,10 +26,51 @@
             </div><!-- end col-->
           </div>
 
+          <!-- Loading Spinner -->
+          @if(isLoading) {
+          <div class="d-flex justify-content-center align-items-center" style="min-height: 500px;">
+            <div class="text-center">
+              <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+              <p class="text-muted mt-3 mb-0">Loading data...</p>
+            </div>
+          </div>
+          }
+
+          <!-- No Data -->
+          @else if(total === 0) {
+          <div class="d-flex justify-content-center align-items-center" style="min-height: 500px;">
+            <div class="text-center">
+              <i class="bx bx-folder-open text-muted" style="font-size: 64px;"></i>
+              <h5 class="text-muted mt-3">No Data</h5>
+              <p class="text-muted mb-0">There are no accounts yet. Click <strong>New Account</strong> to add one.</p>
+            </div>
+          </div>
+          }
+
+          <!-- Data Table -->
+          @else {
+
+          <!-- Bulk action bar -->
+          @if(selectedIds.length > 0) {
+          <div class="alert alert-light d-flex align-items-center justify-content-between mb-3 border">
+            <span class="fw-medium"><i class="bx bx-check-circle text-primary me-1"></i> {{selectedIds.length}} item(s) selected</span>
+            <button type="button" class="btn btn-danger btn-sm" (click)="deleteSelected()">
+              <i class="bx bx-trash me-1"></i> Delete Selected
+            </button>
+          </div>
+          }
+
           <div class="table-responsive">
             <table class="table align-middle table-nowrap table-hover dt-responsive nowrap w-100">
               <thead class="table-light">
                 <tr>
+                  <th scope="col" style="width: 40px;">
+                    <div class="form-check">
+                      <input class="form-check-input" type="checkbox" id="checkAll" [checked]="isAllSelected()" (change)="toggleSelectAll($event)" />
+                    </div>
+                  </th>
                   <th scope="col" style="width: 40px;">#</th>
                   <th scope="col">Name</th>
                   <th scope="col">Url / IP</th>
@@ -41,6 +82,11 @@
               <tbody>
                 @for(data of pagedAccounts; track $index){
                 <tr>
+                  <td>
+                    <div class="form-check">
+                      <input class="form-check-input" type="checkbox" [checked]="isSelected(data.id)" (change)="toggleSelect(data.id)" />
+                    </div>
+                  </td>
                   <td>
                     <div class="avatar-xs">
                       <span class="avatar-title rounded-circle bg-primary-subtle text-primary font-size-18">
@@ -70,10 +116,10 @@
                         <a href="javascript:void(0);" (click)="viewLoginDetails(data)" tooltip="View Details"><i class="bx bx-show"></i></a>
                       </li>
                       <li class="list-inline-item px-2">
-                        <a href="javascript:void(0);" (click)="editAccount($index)" tooltip="Edit"><i class="bx bx-pencil text-success"></i></a>
+                        <a href="javascript:void(0);" (click)="editAccount(data.id)" tooltip="Edit"><i class="bx bx-pencil text-success"></i></a>
                       </li>
                       <li class="list-inline-item px-2">
-                        <a href="javascript:void(0);" (click)="deleteAccount($index)" tooltip="Delete"><i class="bx bx-trash text-danger"></i></a>
+                        <a href="javascript:void(0);" (click)="deleteAccount(data.id)" tooltip="Delete"><i class="bx bx-trash text-danger"></i></a>
                       </li>
                     </ul>
                   </td>
@@ -87,7 +133,7 @@
           <div class="row">
             <div class="col-sm-6">
               <div class="mt-4 text-muted">
-                Showing {{ total === 0 ? 0 : (page - 1) * itemsPerPage + 1 }} to {{ page * itemsPerPage > total ? total : page * itemsPerPage }} of {{ total }} entries
+                Showing {{ (page - 1) * itemsPerPage + 1 }} to {{ page * itemsPerPage > total ? total : page * itemsPerPage }} of {{ total }} entries
               </div>
             </div>
             <div class="col-sm-6">
@@ -96,6 +142,7 @@
                 </ul>
             </div>
           </div>
+          }
 
         </div>
       </div>
