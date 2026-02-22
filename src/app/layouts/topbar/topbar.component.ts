@@ -2,7 +2,6 @@ import { Component, OnInit, Output, EventEmitter, Inject, DOCUMENT } from '@angu
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthenticationService } from '../../core/services/auth.service';
-import { AuthfakeauthenticationService } from '../../core/services/authfake.service';
 import { environment } from '../../../environments/environment';
 import { CookieService } from 'ngx-cookie-service';
 import { LanguageService } from '../../core/services/language.service';
@@ -38,7 +37,6 @@ export class TopbarComponent implements OnInit {
   // Define layoutMode as a property
 
   constructor(@Inject(DOCUMENT) private document: any, private router: Router, private authService: AuthenticationService,
-    private authFackservice: AuthfakeauthenticationService,
     public languageService: LanguageService,
     public translate: TranslateService,
     public _cookiesService: CookieService, public store: Store<RootReducerState>) {
@@ -95,11 +93,7 @@ export class TopbarComponent implements OnInit {
    * Logout the user
    */
   logout() {
-    if (environment.defaultauth === 'firebase') {
-      this.authService.logout();
-    } else {
-      this.authFackservice.logout();
-    }
+    this.authService.logout();
     this.router.navigate(['/auth/login']);
   }
 

@@ -1,70 +1,71 @@
 import { Injectable } from '@angular/core';
-
-import { getFirebaseBackend } from '../../authUtils';
+import { HttpClient } from '@angular/common/http';
+import { Observable, of } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { User } from 'src/app/store/Authentication/auth.models';
-import { from, map } from 'rxjs';
-
+import { environment } from 'src/environments/environment';
 
 @Injectable({ providedIn: 'root' })
-
 export class AuthenticationService {
 
-    user: User;
+    user: User | null = null;
 
-    constructor() {
-    }
+    constructor(private http: HttpClient) { }
 
     /**
-     * Returns the current user
+     * Returns the current user from localStorage
      */
-    public currentUser(): User {
-        return getFirebaseBackend().getAuthenticatedUser();
+    public currentUser(): User | null {
+        if (!this.user) {
+            const storedUser = localStorage.getItem('currentUser');
+            if (storedUser) {
+                this.user = JSON.parse(storedUser);
+            }
+        }
+        return this.user;
     }
-
 
     /**
      * Performs the auth
      * @param email email of user
      * @param password password of user
      */
-    login(email: string, password: string) {
-        return from(getFirebaseBackend().loginUser(email, password).pipe(map(user => {
-            return user;
-        }
-        )));
+    login(email: string, password: string): Observable<User> {
+        return this.http.post<any>(`${environment.apiUrl}/auth/login`, { email, password }).pipe(
+            map((response) => {
+                const user: User = response;
+                if (user && user.token) {
+                    localStorage.setItem('currentUser', JSON.stringify(user));
+                    localStorage.setItem('token', user.token);
+                    this.user = user;
+                }
+                return user;
+            })
+        );
     }
 
     /**
      * Performs the register
-     * @param email email
-     * @param password password
+     * @param user user data
      */
-    register(user: User) {
-        // return from(getFirebaseBackend().registerUser(user));
-
-        return from(getFirebaseBackend().registerUser(user).then((response: any) => {
-            const user = response;
-            return user;
-        }));
+    register(user: User): Observable<User> {
+        return this.http.post<User>(`${environment.apiUrl}/auth/register`, user);
     }
 
     /**
      * Reset password
      * @param email email
      */
-    resetPassword(email: string) {
-        return getFirebaseBackend().forgetPassword(email).then((response: any) => {
-            const message = response.data;
-            return message;
-        });
+    resetPassword(email: string): Observable<any> {
+        return this.http.post(`${environment.apiUrl}/auth/forgot-password`, { email });
     }
 
     /**
      * Logout the user
      */
     logout() {
-        // logout the user
-        getFirebaseBackend().logout();
+        localStorage.removeItem('currentUser');
+        localStorage.removeItem('token');
+        this.user = null;
     }
 }
-

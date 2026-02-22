@@ -1,0 +1,207 @@
+<div class="container-fluid">
+
+  <app-page-title title="Account List" [breadcrumbItems]="breadCrumbItems"></app-page-title>
+
+  <div class="row">
+    <div class="col-lg-12">
+      <div class="card">
+        <div class="card-body">
+          <div class="row mb-2">
+            <div class="col-sm-4">
+              <div class="search-box me-2 mb-2 d-inline-block">
+                <div class="position-relative">
+                  <input type="text" class="form-control" placeholder="Search...">
+                  <i class="bx bx-search-alt search-icon"></i>
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-8">
+              <div class="text-sm-end">
+                <button type="button" class="btn btn-warning btn-rounded waves-effect waves-light mb-2 me-2" (click)="autoGenerateAccounts()" [disabled]="isGenerating">
+                  <i class="mdi mdi-lightning-bolt me-1"></i>
+                  {{ isGenerating ? 'Generating... (' + generatedCount + '/50)' : 'Auto Account' }}
+                </button>
+                <button type="button" class="btn btn-success btn-rounded waves-effect waves-light mb-2" (click)="addAccountModal.show()"><i class="mdi mdi-plus me-1"></i> New Account</button>
+              </div>
+            </div><!-- end col-->
+          </div>
+
+          <div class="table-responsive">
+            <table class="table align-middle table-nowrap table-hover dt-responsive nowrap w-100">
+              <thead class="table-light">
+                <tr>
+                  <th scope="col" style="width: 40px;">#</th>
+                  <th scope="col">Name</th>
+                  <th scope="col">Url / IP</th>
+                  <th scope="col">Tags</th>
+                  <th scope="col">Last Updated</th>
+                  <th scope="col" style="width: 150px;">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for(data of pagedAccounts; track $index){
+                <tr>
+                  <td>
+                    <div class="avatar-xs">
+                      <span class="avatar-title rounded-circle bg-primary-subtle text-primary font-size-18">
+                        <i class="{{data.platformIcon}}"></i>
+                      </span>
+                    </div>
+                  </td>
+                  <td>
+                    <h5 class="font-size-14 mb-1"><a href="javascript: void(0);" class="text-dark">{{data.name}}</a></h5>
+                  </td>
+                  <td>{{data.url}}</td>
+                  <td>
+                    <div>
+                      @if(data.tags && data.tags.length > 0) {
+                        @for(tag of data.tags; track $index) {
+                          <a href="javascript: void(0);" class="badge badge-soft-primary font-size-11 m-1">{{tag}}</a>
+                        }
+                      }
+                    </div>
+                  </td>
+                  <td>
+                    {{data.lastUpdated}}
+                  </td>
+                  <td>
+                    <ul class="list-inline font-size-20 contact-links mb-0">
+                      <li class="list-inline-item px-2">
+                        <a href="javascript:void(0);" (click)="viewLoginDetails(data)" tooltip="View Details"><i class="bx bx-show"></i></a>
+                      </li>
+                      <li class="list-inline-item px-2">
+                        <a href="javascript:void(0);" (click)="editAccount($index)" tooltip="Edit"><i class="bx bx-pencil text-success"></i></a>
+                      </li>
+                      <li class="list-inline-item px-2">
+                        <a href="javascript:void(0);" (click)="deleteAccount($index)" tooltip="Delete"><i class="bx bx-trash text-danger"></i></a>
+                      </li>
+                    </ul>
+                  </td>
+                </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+          <!-- end table-responsive -->
+          
+          <div class="row">
+            <div class="col-sm-6">
+              <div class="mt-4 text-muted">
+                Showing {{ total === 0 ? 0 : (page - 1) * itemsPerPage + 1 }} to {{ page * itemsPerPage > total ? total : page * itemsPerPage }} of {{ total }} entries
+              </div>
+            </div>
+            <div class="col-sm-6">
+                <ul class="pagination justify-content-end mt-4">
+                    <pagination [totalItems]="total" [itemsPerPage]="itemsPerPage" [(ngModel)]="page" (pageChanged)="pageChanged($event)" [maxSize]="5" [boundaryLinks]="true" previousText="‹" nextText="›" firstText="«" lastText="»"></pagination>
+                </ul>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal for View Login Details -->
+<div bsModal #loginDetailsModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="loginDetailsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="loginDetailsModalLabel">Account Details: {{selectedAccount?.name}}</h5>
+        <button type="button" class="btn-close" (click)="loginDetailsModal.hide()" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <pre class="bg-light p-3 rounded" style="white-space: pre-wrap;">{{loginDetailsContent}}</pre>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="loginDetailsModal.hide()">Close</button>
+        <button type="button" class="btn btn-primary" id="btn-copy-clipboard" (click)="copyToClipboard()">
+            <i class="bx bx-copy me-1"></i> Copy
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal for Add Account -->
+<div bsModal #addAccountModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="addAccountModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addAccountModalLabel">Add New Account</h5>
+        <button type="button" class="btn-close" (click)="addAccountModal.hide()" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="accountForm" (ngSubmit)="saveAccount()">
+            <div class="row">
+
+                <div class="col-md-6 mb-3">
+                    <label for="name" class="form-label">Account Name</label>
+                    <input type="text" class="form-control" id="name" formControlName="name" placeholder="Ex: Facebook Ads"
+                        [ngClass]="{ 'is-invalid': submitted && f['name'].errors }" />
+                    @if(submitted && f['name'].errors) {
+                        <div class="invalid-feedback">Name is required</div>
+                    }
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label for="url" class="form-label">Url / IP</label>
+                    <input type="text" class="form-control" id="url" formControlName="url" placeholder="Ex: business.facebook.com or 192.168.1.1"
+                        [ngClass]="{ 'is-invalid': submitted && f['url'].errors }" />
+                    @if(submitted && f['url'].errors) {
+                        <div class="invalid-feedback">Url is required</div>
+                    }
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label for="tags" class="form-label">Tags (comma separated)</label>
+                    <input type="text" class="form-control" id="tags" formControlName="tags" placeholder="Ex: Social, Marketing" />
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label for="platform" class="form-label">Platform Type</label>
+                    <select class="form-select" id="platform" formControlName="platformIcon">
+                        @for(option of platformOptions; track option) {
+                           <option [value]="option.icon">{{option.name}}</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-12 mt-3">
+                    <h5 class="card-title mb-3">Login Details</h5>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label for="username" class="form-label">Username / ID</label>
+                    <input type="text" class="form-control" id="username" formControlName="username" />
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label for="password" class="form-label">Password / Token</label>
+                    <input type="text" class="form-control" id="password" formControlName="password" />
+                </div>
+
+                @if(needsPort) {
+                <div class="col-md-6 mb-3">
+                    <label for="port" class="form-label">Port</label>
+                    <input type="text" class="form-control" id="port" formControlName="port" placeholder="Ex: 22, 3306, 5432" />
+                </div>
+                } @else {
+                <div class="col-12 mb-3">
+                    <label for="notes" class="form-label">Notes / Additional Info</label>
+                    <textarea class="form-control" id="notes" formControlName="notes" rows="3"></textarea>
+                </div>
+                }
+
+            </div>
+
+            <div class="text-end mt-3">
+                <button type="button" class="btn btn-secondary me-2" (click)="addAccountModal.hide()">Cancel</button>
+                <button type="submit" class="btn btn-success">Save Account</button>
+            </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

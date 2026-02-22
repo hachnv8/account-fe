@@ -3,14 +3,13 @@ import { FormsModule, ReactiveFormsModule, UntypedFormBuilder, UntypedFormGroup,
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { AuthenticationService } from '../../../core/services/auth.service';
-import { environment } from '../../../../environments/environment';
 import { CommonModule } from '@angular/common';
 
 @Component({
-    selector: 'app-passwordreset',
-    templateUrl: './passwordreset.component.html',
-    styleUrls: ['./passwordreset.component.scss'],
-    imports: [CommonModule, FormsModule, ReactiveFormsModule]
+  selector: 'app-passwordreset',
+  templateUrl: './passwordreset.component.html',
+  styleUrls: ['./passwordreset.component.scss'],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule]
 })
 
 /**
@@ -54,11 +53,13 @@ export class PasswordresetComponent implements OnInit, AfterViewInit {
     if (this.resetForm.invalid) {
       return;
     }
-    if (environment.defaultauth === 'firebase') {
-      this.authenticationService.resetPassword(this.f.email.value)
-        .catch(error => {
-          this.error = error ? error : '';
-        });
-    }
+    this.authenticationService.resetPassword(this.f['email'].value).subscribe({
+      next: (response) => {
+        this.success = 'Password reset email has been sent.';
+      },
+      error: (err) => {
+        this.error = err ? err : '';
+      }
+    });
   }
 }

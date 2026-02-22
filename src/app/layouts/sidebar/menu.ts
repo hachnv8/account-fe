@@ -18,21 +18,9 @@ export const MENU: MenuItem[] = [
         icon: 'bxs-user-detail',
         subItems: [
             {
-                id: 4,
-                label: 'MENUITEMS.ACCOUNT_MANAGER.LIST.ACCOUNT_GRID',
-                link: '/contacts/grid',
-                parentId: 3
-            },
-            {
                 id: 5,
                 label: 'MENUITEMS.ACCOUNT_MANAGER.LIST.ACCOUNT_LIST',
-                link: '/contacts/list',
-                parentId: 3
-            },
-            {
-                id: 6,
-                label: 'MENUITEMS.ACCOUNT_MANAGER.LIST.PROFILE',
-                link: '/contacts/profile',
+                link: '/account-manager/list',
                 parentId: 3
             }
         ]
