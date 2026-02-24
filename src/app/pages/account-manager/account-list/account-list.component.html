@@ -10,18 +10,21 @@
             <div class="col-sm-4">
               <div class="search-box me-2 mb-2 d-inline-block">
                 <div class="position-relative">
-                  <input type="text" class="form-control" placeholder="Search by name or URL/IP..." [(ngModel)]="searchTerm" (ngModelChange)="onSearch()">
+                  <input type="text" class="form-control" placeholder="Search projects..." [(ngModel)]="searchTerm" (ngModelChange)="onSearch()">
                   <i class="bx bx-search-alt search-icon"></i>
                 </div>
               </div>
             </div>
             <div class="col-sm-8">
               <div class="text-sm-end">
+                <button type="button" class="btn btn-info btn-rounded waves-effect waves-light mb-2 me-2" (click)="refreshData()" [disabled]="isLoading">
+                  <i class="mdi mdi-refresh me-1"></i> Refresh
+                </button>
                 <button type="button" class="btn btn-warning btn-rounded waves-effect waves-light mb-2 me-2" (click)="autoGenerateAccounts()" [disabled]="isGenerating">
                   <i class="mdi mdi-lightning-bolt me-1"></i>
                   {{ isGenerating ? 'Generating... (' + generatedCount + '/50)' : 'Auto Account' }}
                 </button>
-                <button type="button" class="btn btn-success btn-rounded waves-effect waves-light mb-2" (click)="addAccountModal.show()"><i class="mdi mdi-plus me-1"></i> New Account</button>
+                <button type="button" class="btn btn-success btn-rounded waves-effect waves-light mb-2" (click)="openAddProjectModal()"><i class="mdi mdi-plus me-1"></i> New Project</button>
               </div>
             </div><!-- end col-->
           </div>
@@ -39,12 +42,12 @@
           }
 
           <!-- No Data -->
-          @else if(total === 0) {
+          @else if(totalProjects === 0) {
           <div class="d-flex justify-content-center align-items-center" style="min-height: 500px;">
             <div class="text-center">
               <i class="bx bx-folder-open text-muted" style="font-size: 64px;"></i>
-              <h5 class="text-muted mt-3">No Data</h5>
-              <p class="text-muted mb-0">There are no accounts yet. Click <strong>New Account</strong> to add one.</p>
+              <h5 class="text-muted mt-3">No Projects</h5>
+              <p class="text-muted mb-0">There are no projects yet. Click <strong>New Project</strong> to add one.</p>
             </div>
           </div>
           }
@@ -53,10 +56,10 @@
           @else {
 
           <!-- Bulk action bar -->
-          @if(selectedIds.length > 0) {
+          @if(selectedProjectIds.length > 0) {
           <div class="alert alert-light d-flex align-items-center justify-content-between mb-3 border">
-            <span class="fw-medium"><i class="bx bx-check-circle text-primary me-1"></i> {{selectedIds.length}} item(s) selected</span>
-            <button type="button" class="btn btn-danger btn-sm" (click)="deleteSelected()">
+            <span class="fw-medium"><i class="bx bx-check-circle text-primary me-1"></i> {{selectedProjectIds.length}} item(s) selected</span>
+            <button type="button" class="btn btn-danger btn-sm" disabled>
               <i class="bx bx-trash me-1"></i> Delete Selected
             </button>
           </div>
@@ -66,60 +69,37 @@
             <table class="table align-middle table-nowrap table-hover dt-responsive nowrap w-100">
               <thead class="table-light">
                 <tr>
-                  <th scope="col" style="width: 40px;">
-                    <div class="form-check">
-                      <input class="form-check-input" type="checkbox" id="checkAll" [checked]="isAllSelected()" (change)="toggleSelectAll($event)" />
-                    </div>
-                  </th>
                   <th scope="col" style="width: 40px;">#</th>
-                  <th scope="col">Name</th>
-                  <th scope="col">Url / IP</th>
-                  <th scope="col">Tags</th>
+                  <th scope="col">Project Name</th>
+                  <th scope="col">Accounts</th>
                   <th scope="col">Last Updated</th>
                   <th scope="col" style="width: 150px;">Action</th>
                 </tr>
               </thead>
               <tbody>
-                @for(data of pagedAccounts; track $index){
-                <tr>
-                  <td>
-                    <div class="form-check">
-                      <input class="form-check-input" type="checkbox" [checked]="isSelected(data.id)" (change)="toggleSelect(data.id)" />
-                    </div>
-                  </td>
+                @for(data of pagedProjects; track $index){
+                <tr style="cursor: pointer;" (click)="viewProjectAccounts(data)">
                   <td>
                     <div class="avatar-xs">
-                      <span class="avatar-title rounded-circle bg-primary-subtle text-primary font-size-18">
-                        <i class="{{data.platformIcon}}"></i>
+                      <span class="avatar-title rounded-circle bg-warning-subtle text-warning font-size-18">
+                        <i class="bx bxs-folder"></i>
                       </span>
                     </div>
                   </td>
                   <td>
                     <h5 class="font-size-14 mb-1"><a href="javascript: void(0);" class="text-dark">{{data.name}}</a></h5>
                   </td>
-                  <td>{{data.url}}</td>
-                  <td>
-                    <div>
-                      @if(data.tags && data.tags.length > 0) {
-                        @for(tag of data.tags; track $index) {
-                          <a href="javascript: void(0);" class="badge badge-soft-primary font-size-11 m-1">{{tag}}</a>
-                        }
-                      }
-                    </div>
-                  </td>
+                  <td><span class="badge bg-primary rounded-pill">{{data.count}} accounts</span></td>
                   <td>
                     {{data.lastUpdated}}
                   </td>
                   <td>
-                    <ul class="list-inline font-size-20 contact-links mb-0">
-                      <li class="list-inline-item px-2">
-                        <a href="javascript:void(0);" (click)="viewLoginDetails(data)" tooltip="View Details"><i class="bx bx-show"></i></a>
+                    <ul class="list-unstyled hstack gap-1 mb-0">
+                      <li data-bs-toggle="tooltip" data-bs-placement="top" title="Edit">
+                        <a href="javascript:void(0);" class="btn btn-sm btn-soft-info" (click)="editProject(data, $event)"><i class="mdi mdi-pencil-outline"></i></a>
                       </li>
-                      <li class="list-inline-item px-2">
-                        <a href="javascript:void(0);" (click)="editAccount(data.id)" tooltip="Edit"><i class="bx bx-pencil text-success"></i></a>
-                      </li>
-                      <li class="list-inline-item px-2">
-                        <a href="javascript:void(0);" (click)="deleteAccount(data.id)" tooltip="Delete"><i class="bx bx-trash text-danger"></i></a>
+                      <li data-bs-toggle="tooltip" data-bs-placement="top" title="Delete">
+                        <a href="javascript:void(0);" data-bs-toggle="modal" class="btn btn-sm btn-soft-danger" (click)="deleteProject(data, $event)"><i class="mdi mdi-delete-outline"></i></a>
                       </li>
                     </ul>
                   </td>
@@ -133,12 +113,12 @@
           <div class="row">
             <div class="col-sm-6">
               <div class="mt-4 text-muted">
-                Showing {{ (page - 1) * itemsPerPage + 1 }} to {{ page * itemsPerPage > total ? total : page * itemsPerPage }} of {{ total }} entries
+                Showing {{ (projectPage - 1) * projectItemsPerPage + 1 }} to {{ projectPage * projectItemsPerPage > totalProjects ? totalProjects : projectPage * projectItemsPerPage }} of {{ totalProjects }} entries
               </div>
             </div>
             <div class="col-sm-6">
                 <ul class="pagination justify-content-end mt-4">
-                    <pagination [totalItems]="total" [itemsPerPage]="itemsPerPage" [(ngModel)]="page" (pageChanged)="pageChanged($event)" [maxSize]="5" [boundaryLinks]="true" previousText="‹" nextText="›" firstText="«" lastText="»"></pagination>
+                    <pagination [totalItems]="totalProjects" [itemsPerPage]="projectItemsPerPage" [(ngModel)]="projectPage" (pageChanged)="projectPageChanged($event)" [maxSize]="5" [boundaryLinks]="true" previousText="‹" nextText="›" firstText="«" lastText="»"></pagination>
                 </ul>
             </div>
           </div>
@@ -182,6 +162,19 @@
       <div class="modal-body">
         <form [formGroup]="accountForm" (ngSubmit)="saveAccount()">
             <div class="row">
+
+                <div class="col-md-6 mb-3">
+                    <label for="projectId" class="form-label">Project</label>
+                    <select class="form-select" id="projectId" formControlName="projectId" [ngClass]="{ 'is-invalid': submitted && f['projectId'].errors }">
+                        <option value="" disabled>Select a project</option>
+                        @for(p of projectList; track p) {
+                            <option [value]="p.id">{{p.name}}</option>
+                        }
+                    </select>
+                    @if(submitted && f['projectId'].errors) {
+                        <div class="invalid-feedback">Project is required</div>
+                    }
+                </div>
 
                 <div class="col-md-6 mb-3">
                     <label for="name" class="form-label">Account Name</label>
@@ -246,6 +239,180 @@
             <div class="text-end mt-3">
                 <button type="button" class="btn btn-secondary me-2" (click)="addAccountModal.hide()">Cancel</button>
                 <button type="submit" class="btn btn-success">Save Account</button>
+            </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal for Project Details -->
+<div bsModal #projectDetailsModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="projectDetailsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="projectDetailsModalLabel">
+          <i class="bx bxs-folder text-warning me-2"></i> {{selectedProject?.name}}
+        </h5>
+        <button type="button" class="btn-close" (click)="projectDetailsModal.hide()" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        
+        <div class="row mb-3">
+          <div class="col-sm-4">
+            <div class="search-box me-2 mb-2 d-inline-block">
+              <div class="position-relative">
+                <input type="text" class="form-control" placeholder="Search accounts..." [(ngModel)]="accountSearchTerm" (ngModelChange)="onAccountSearch()">
+                <i class="bx bx-search-alt search-icon"></i>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-8">
+            <div class="text-sm-end">
+              <button type="button" class="btn btn-success btn-rounded waves-effect waves-light mb-2" (click)="openAddModal()"><i class="mdi mdi-plus me-1"></i> Add Account</button>
+            </div>
+          </div>
+        </div>
+
+        @if(isAccountLoading) {
+        <div class="d-flex justify-content-center align-items-center" style="min-height: 200px;">
+          <div class="text-center">
+            <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="text-muted mt-3 mb-0">Loading accounts...</p>
+          </div>
+        </div>
+        } @else {
+
+        @if(selectedAccountIds.length > 0) {
+        <div class="alert alert-light d-flex align-items-center justify-content-between mb-3 border">
+          <span class="fw-medium"><i class="bx bx-check-circle text-primary me-1"></i> {{selectedAccountIds.length}} item(s) selected</span>
+          <button type="button" class="btn btn-danger btn-sm" (click)="deleteSelectedAccounts()">
+            <i class="bx bx-trash me-1"></i> Delete Selected
+          </button>
+        </div>
+        }
+
+        <div class="table-responsive">
+          <table class="table align-middle table-nowrap table-hover dt-responsive nowrap w-100">
+            <thead class="table-light">
+              <tr>
+                <th scope="col" style="width: 40px;">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="checkAllAccounts" [checked]="isAllAccountsSelected()" (change)="toggleAccountSelectAll($event)" />
+                  </div>
+                </th>
+                <th scope="col" style="width: 40px;">#</th>
+                <th scope="col">Name</th>
+                <th scope="col">Url / IP</th>
+                <th scope="col">Tags</th>
+                <th scope="col">Last Updated</th>
+                <th scope="col" style="width: 150px;">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for(data of pagedAccounts; track $index){
+              <tr>
+                <td>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" [checked]="isAccountSelected(data.id)" (change)="toggleAccountSelect(data.id)" />
+                  </div>
+                </td>
+                <td>
+                  <div class="avatar-xs">
+                    <span class="avatar-title rounded-circle bg-primary-subtle text-primary font-size-18">
+                      <i class="{{data.platformIcon}}"></i>
+                    </span>
+                  </div>
+                </td>
+                <td>
+                  <h5 class="font-size-14 mb-1"><a href="javascript: void(0);" class="text-dark">{{data.name}}</a></h5>
+                </td>
+                <td>{{data.url}}</td>
+                <td>
+                  <div>
+                    @if(data.tags && data.tags.length > 0) {
+                      @for(tag of data.tags; track $index) {
+                        <a href="javascript: void(0);" class="badge badge-soft-primary font-size-11 m-1">{{tag}}</a>
+                      }
+                    }
+                  </div>
+                </td>
+                <td>
+                  {{data.lastUpdated}}
+                </td>
+                <td>
+                  <ul class="list-inline font-size-20 contact-links mb-0">
+                    <li class="list-inline-item px-2">
+                      <a href="javascript:void(0);" (click)="viewLoginDetails(data)" tooltip="View Details"><i class="bx bx-show"></i></a>
+                    </li>
+                    <li class="list-inline-item px-2">
+                      <a href="javascript:void(0);" (click)="editAccount(data.id)" tooltip="Edit"><i class="bx bx-pencil text-success"></i></a>
+                    </li>
+                    <li class="list-inline-item px-2">
+                      <a href="javascript:void(0);" (click)="deleteAccount(data.id)" tooltip="Delete"><i class="bx bx-trash text-danger"></i></a>
+                    </li>
+                  </ul>
+                </td>
+              </tr>
+              }
+              @if(pagedAccounts.length === 0) {
+              <tr>
+                <td colspan="7" class="text-center py-4">
+                  <p class="text-muted mb-0">No accounts found in this project.</p>
+                </td>
+              </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <div class="row">
+          <div class="col-sm-6">
+            <div class="mt-4 text-muted">
+              Showing {{ (accountPage - 1) * accountItemsPerPage + (totalAccounts > 0 ? 1 : 0) }} to {{ accountPage * accountItemsPerPage > totalAccounts ? totalAccounts : accountPage * accountItemsPerPage }} of {{ totalAccounts }} entries
+            </div>
+          </div>
+          <div class="col-sm-6">
+              <ul class="pagination justify-content-end mt-4">
+                  <pagination [totalItems]="totalAccounts" [itemsPerPage]="accountItemsPerPage" [(ngModel)]="accountPage" (pageChanged)="accountPageChanged($event)" [maxSize]="5" [boundaryLinks]="true" previousText="‹" nextText="›" firstText="«" lastText="»"></pagination>
+              </ul>
+          </div>
+        </div>
+        }
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="projectDetailsModal.hide()">Close Full Project</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal for Add Project -->
+<div bsModal #addProjectModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="addProjectModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addProjectModalLabel">{{editingProjectId ? 'Edit Project' : 'Add New Project'}}</h5>
+        <button type="button" class="btn-close" (click)="addProjectModal.hide()" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="projectForm" (ngSubmit)="saveProject()">
+            <div class="row">
+                <div class="col-12 mb-3">
+                    <label for="projectName" class="form-label">Project Name</label>
+                    <input type="text" class="form-control" id="projectName" formControlName="name" placeholder="Ex: Project Alpha"
+                        [ngClass]="{ 'is-invalid': projectSubmitted && pf['name'].errors }" />
+                    @if(projectSubmitted && pf['name'].errors) {
+                        <div class="invalid-feedback">Project Name is required</div>
+                    }
+                </div>
+            </div>
+
+            <div class="text-end mt-3">
+                <button type="button" class="btn btn-secondary me-2" (click)="addProjectModal.hide()">Cancel</button>
+                <button type="submit" class="btn btn-success">{{editingProjectId ? 'Update Project' : 'Save Project'}}</button>
             </div>
         </form>
       </div>

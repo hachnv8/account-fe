@@ -47,4 +47,24 @@ export class AccountService {
     deleteAccount(id: number): Observable<any> {
         return this.http.delete<any>(`${this.apiUrl}/${id}`);
     }
+
+    // --- Projects API ---
+    // Assuming backend will have these, creating mock-like behavior or actual endpoints
+    private projectApiUrl = `${environment.apiUrl}/projects`;
+
+    getProjects(): Observable<any[]> {
+        return this.http.get<any[]>(this.projectApiUrl);
+    }
+
+    addProject(project: any): Observable<any> {
+        return this.http.post<any>(this.projectApiUrl, project);
+    }
+
+    updateProject(id: number, project: any): Observable<any> {
+        return this.http.put<any>(`${this.projectApiUrl}/${id}`, project);
+    }
+
+    deleteProject(id: number): Observable<any> {
+        return this.http.delete<any>(`${this.projectApiUrl}/${id}`);
+    }
 }

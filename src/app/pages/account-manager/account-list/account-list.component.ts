@@ -20,32 +20,57 @@ export class AccountListComponent implements OnInit {
     breadCrumbItems: Array<{}>;
 
     // Data
+    projectList: any[] = [];
+    filteredProjectList: any[] = [];
+    pagedProjects: any[] = [];
+
+    // Cache all accounts
+    allAccounts: any[] = [];
+    hasFetchedAccounts: boolean = false;
+
+    // Manage currently selected project's accounts
+    selectedProject: any = null;
     accountList: any[] = [];
-    filteredList: any[] = [];
+    filteredAccountList: any[] = [];
     pagedAccounts: any[] = [];
+
     selectedAccount: any;
     loginDetailsContent: string = '';
     loginDetailEntries: { key: string, value: string }[] = [];
 
-    // Pagination
-    total: number = 0;
-    page: number = 1;
-    itemsPerPage: number = 10;
+    // Pagination for Projects
+    totalProjects: number = 0;
+    projectPage: number = 1;
+    projectItemsPerPage: number = 10;
+
+    // Pagination for Accounts
+    totalAccounts: number = 0;
+    accountPage: number = 1;
+    accountItemsPerPage: number = 10;
+
     isLoading: boolean = false;
+    isAccountLoading: boolean = false;
 
     // Search
     searchTerm: string = '';
+    accountSearchTerm: string = '';
 
     // Auto generate
     isGenerating: boolean = false;
     generatedCount: number = 0;
 
-    // Multi-select
-    selectedIds: number[] = [];
+    // Multi-select Data (Projects)
+    selectedProjectIds: number[] = [];
+
+    // Multi-select Data (Accounts)
+    selectedAccountIds: number[] = [];
 
     // Forms
     accountForm: FormGroup;
+    projectForm: FormGroup;
     submitted: boolean = false;
+    projectSubmitted: boolean = false;
+    editingProjectId: number | null = null;
 
     // Platform options for the automated icon selection
     platformOptions = [
@@ -65,62 +90,128 @@ export class AccountListComponent implements OnInit {
     // Modal
     @ViewChild('loginDetailsModal', { static: false }) loginDetailsModal?: ModalDirective;
     @ViewChild('addAccountModal', { static: false }) addAccountModal?: ModalDirective;
+    @ViewChild('projectDetailsModal', { static: false }) projectDetailsModal?: ModalDirective;
+    @ViewChild('addProjectModal', { static: false }) addProjectModal?: ModalDirective;
 
     constructor(private accountService: AccountService, private formBuilder: FormBuilder) { }
 
     ngOnInit(): void {
-        this.breadCrumbItems = [{ label: 'Account Manager' }, { label: 'Account List', active: true }];
+        this.breadCrumbItems = [{ label: 'Account Manager' }, { label: 'Projects', active: true }];
         this.initForm();
-        this.fetchData();
+        this.fetchProjects();
     }
 
-    fetchData() {
+    fetchProjects() {
         this.isLoading = true;
-        this.accountService.getAccounts().subscribe({
+        this.accountService.getProjects().subscribe({
             next: (data) => {
-                this.accountList = data;
-                this.applyFilter();
+                this.projectList = data;
+                this.applyProjectFilter();
                 this.isLoading = false;
             },
             error: (err) => {
-                console.error('Error fetching data', err);
+                console.error('Error fetching projects', err);
                 this.isLoading = false;
+                // fallback mock data for testing if API fails
+                this.projectList = [
+                    { id: 1, name: 'Project A', count: 5, lastUpdated: '2026-02-23' },
+                    { id: 2, name: 'Project B', count: 3, lastUpdated: '2026-02-22' }
+                ];
+                this.applyProjectFilter();
             }
         });
     }
 
-    onSearch() {
-        this.page = 1;
-        this.applyFilter();
+    fetchAccountsForProject(projectId: number) {
+        if (!this.hasFetchedAccounts) {
+            this.isAccountLoading = true;
+            this.accountService.getAccounts().subscribe({
+                next: (data) => {
+                    this.allAccounts = data;
+                    this.hasFetchedAccounts = true;
+                    // filter accounts for this project
+                    this.accountList = this.allAccounts.filter(a => a.projectId === projectId);
+                    this.applyAccountFilter();
+                    this.isAccountLoading = false;
+                },
+                error: (err) => {
+                    console.error('Error fetching accounts', err);
+                    this.isAccountLoading = false;
+                }
+            });
+        } else {
+            this.accountList = this.allAccounts.filter(a => a.projectId === projectId);
+            this.applyAccountFilter();
+        }
     }
 
-    applyFilter() {
+    refreshData() {
+        this.hasFetchedAccounts = false;
+        this.fetchProjects();
+    }
+
+    onSearch() {
+        this.projectPage = 1;
+        this.applyProjectFilter();
+    }
+
+    onAccountSearch() {
+        this.accountPage = 1;
+        this.applyAccountFilter();
+    }
+
+    applyProjectFilter() {
         const term = this.searchTerm.toLowerCase().trim();
         if (term) {
-            this.filteredList = this.accountList.filter(a =>
+            this.filteredProjectList = this.projectList.filter(p =>
+                (p.name && p.name.toLowerCase().includes(term))
+            );
+        } else {
+            this.filteredProjectList = [...this.projectList];
+        }
+        this.totalProjects = this.filteredProjectList.length;
+        this.updatePagedProjects();
+    }
+
+    applyAccountFilter() {
+        const term = this.accountSearchTerm.toLowerCase().trim();
+        if (term) {
+            this.filteredAccountList = this.accountList.filter(a =>
                 (a.name && a.name.toLowerCase().includes(term)) ||
                 (a.url && a.url.toLowerCase().includes(term))
             );
         } else {
-            this.filteredList = [...this.accountList];
+            this.filteredAccountList = [...this.accountList];
         }
-        this.total = this.filteredList.length;
+        this.totalAccounts = this.filteredAccountList.length;
         this.updatePagedAccounts();
     }
 
-    updatePagedAccounts() {
-        const startIndex = (this.page - 1) * this.itemsPerPage;
-        const endIndex = startIndex + this.itemsPerPage;
-        this.pagedAccounts = this.filteredList.slice(startIndex, endIndex);
+    updatePagedProjects() {
+        const startIndex = (this.projectPage - 1) * this.projectItemsPerPage;
+        const endIndex = startIndex + this.projectItemsPerPage;
+        this.pagedProjects = this.filteredProjectList.slice(startIndex, endIndex);
     }
 
-    pageChanged(event: any) {
-        this.page = event.page;
+    updatePagedAccounts() {
+        const startIndex = (this.accountPage - 1) * this.accountItemsPerPage;
+        const endIndex = startIndex + this.accountItemsPerPage;
+        this.pagedAccounts = this.filteredAccountList.slice(startIndex, endIndex);
+    }
+
+    projectPageChanged(event: any) {
+        this.projectPage = event.page;
+        this.updatePagedProjects();
+    }
+
+    accountPageChanged(event: any) {
+        this.accountPage = event.page;
         this.updatePagedAccounts();
     }
 
     initForm() {
         this.accountForm = this.formBuilder.group({
+            projectId: ['', Validators.required],
             name: ['', Validators.required],
             url: ['', Validators.required],
             platformIcon: [this.platformOptions[0].icon, Validators.required],
@@ -131,9 +222,14 @@ export class AccountListComponent implements OnInit {
             port: [''],
             notes: ['']
         });
+
+        this.projectForm = this.formBuilder.group({
+            name: ['', Validators.required]
+        });
     }
 
     get f() { return this.accountForm.controls; }
+    get pf() { return this.projectForm.controls; }
 
     /**
      * Check if current platform needs a port field
@@ -149,9 +245,18 @@ export class AccountListComponent implements OnInit {
         this.submitted = false;
         this.accountForm.reset();
         this.accountForm.patchValue({
-            platformIcon: this.platformOptions[0].icon
+            platformIcon: this.platformOptions[0].icon,
+            projectId: this.selectedProject ? this.selectedProject.id : ''
         });
         this.addAccountModal?.show();
+    }
+
+    // Open Add Project modal
+    openAddProjectModal() {
+        this.projectSubmitted = false;
+        this.editingProjectId = null;
+        this.projectForm.reset();
+        this.addProjectModal?.show();
     }
 
     // Save Account
@@ -176,6 +281,7 @@ export class AccountListComponent implements OnInit {
 
         // Construct the account object
         const newAccount: any = {
+            projectId: formValues.projectId,
             name: formValues.name,
             url: formValues.url,
             platformIcon: formValues.platformIcon,
@@ -184,20 +290,166 @@ export class AccountListComponent implements OnInit {
             loginDetails: loginDetails
         };
 
-        this.isLoading = true;
+        this.isAccountLoading = true;
         this.accountService.addAccount(newAccount).subscribe({
             next: (data) => {
+                this.allAccounts.unshift(data);
                 this.accountList.unshift(data);
-                this.page = 1;
-                this.applyFilter();
-                this.isLoading = false;
+                this.accountPage = 1;
+                this.applyAccountFilter();
+                this.isAccountLoading = false;
                 this.addAccountModal?.hide();
+
+                // Refresh projects to update count
+                this.fetchProjects();
             },
             error: (err) => {
                 console.error('Error adding account', err);
-                this.isLoading = false;
+                this.isAccountLoading = false;
             }
         });
+    }
+
+    // Save Project
+    saveProject() {
+        this.projectSubmitted = true;
+        if (this.projectForm.invalid) {
+            return;
+        }
+
+        const projectData = {
+            name: this.projectForm.value.name,
+            count: 0,
+            lastUpdated: new Date().toISOString().split('T')[0] // Only update last updated on create
+        };
+
+        this.isLoading = true;
+
+        if (this.editingProjectId) {
+            // Edit existing project
+            const updateData = {
+                id: this.editingProjectId,
+                name: projectData.name
+            };
+
+            this.accountService.updateProject(this.editingProjectId, updateData).subscribe({
+                next: (data) => {
+                    const idx = this.projectList.findIndex(p => p.id === this.editingProjectId);
+                    if (idx > -1) {
+                        this.projectList[idx].name = updateData.name;
+                    }
+                    this.applyProjectFilter();
+                    this.isLoading = false;
+                    this.addProjectModal?.hide();
+                },
+                error: (err) => {
+                    console.error('Error updating project', err);
+
+                    // Mock updating locally if API fails
+                    const idx = this.projectList.findIndex(p => p.id === this.editingProjectId);
+                    if (idx > -1) {
+                        this.projectList[idx].name = updateData.name;
+                    }
+                    this.applyProjectFilter();
+                    this.addProjectModal?.hide();
+
+                    this.isLoading = false;
+                }
+            });
+        } else {
+            // Add new project
+            this.accountService.addProject(projectData).subscribe({
+                next: (data) => {
+                    this.projectList.unshift(data);
+                    this.projectPage = 1;
+                    this.applyProjectFilter();
+                    this.isLoading = false;
+                    this.addProjectModal?.hide();
+                },
+                error: (err) => {
+                    console.error('Error adding project', err);
+
+                    // Mock adding locally if API fails
+                    projectData['id'] = this.projectList.length > 0 ? Math.max(...this.projectList.map(p => p.id)) + 1 : 1;
+                    this.projectList.unshift(projectData);
+                    this.projectPage = 1;
+                    this.applyProjectFilter();
+                    this.addProjectModal?.hide();
+
+                    this.isLoading = false;
+                }
+            });
+        }
+    }
+
+    /**
+     * Edit Project
+     */
+    editProject(project: any, event: Event) {
+        event.stopPropagation(); // prevent opening the project accounts modal
+        this.editingProjectId = project.id;
+        this.projectForm.patchValue({
+            name: project.name
+        });
+        this.addProjectModal?.show();
+    }
+
+    /**
+     * Delete Project
+     */
+    deleteProject(project: any, event: Event) {
+        event.stopPropagation(); // prevent opening the project accounts modal
+
+        Swal.fire({
+            title: 'Are you sure?',
+            text: `You are about to delete the project "${project.name}". This might delete all nested accounts!`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#34c38f',
+            cancelButtonColor: '#f46a6a',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                this.accountService.deleteProject(project.id).subscribe({
+                    next: () => {
+                        this.projectList = this.projectList.filter(p => p.id !== project.id);
+                        this.applyProjectFilter();
+
+                        // Adjust pagination if deleted the last item on the page
+                        const maxPage = Math.ceil(this.totalProjects / this.projectItemsPerPage) || 1;
+                        if (this.projectPage > maxPage) {
+                            this.projectPage = maxPage;
+                            this.updatePagedProjects();
+                        }
+
+                        Swal.fire('Deleted!', 'Project has been deleted.', 'success');
+                    },
+                    error: (err) => {
+                        console.error('Error deleting project', err);
+                        // Mock delete locally if API fails
+                        this.projectList = this.projectList.filter(p => p.id !== project.id);
+                        this.applyProjectFilter();
+                        // Adjust pagination if deleted the last item on the page
+                        const maxPage = Math.ceil(this.totalProjects / this.projectItemsPerPage) || 1;
+                        if (this.projectPage > maxPage) {
+                            this.projectPage = maxPage;
+                            this.updatePagedProjects();
+                        }
+                        Swal.fire('Deleted (Mock)!', 'Failed calling API, deleted locally for testing.', 'success');
+                    }
+                });
+            }
+        });
+    }
+
+    /**
+     * Open the modal to view project accounts
+     */
+    viewProjectAccounts(project: any) {
+        this.selectedProject = project;
+        this.accountSearchTerm = '';
+        this.fetchAccountsForProject(project.id);
+        this.projectDetailsModal?.show();
     }
 
     /**
@@ -250,37 +502,37 @@ export class AccountListComponent implements OnInit {
 
     // ========== Multi-select ==========
 
-    toggleSelect(id: number) {
-        const idx = this.selectedIds.indexOf(id);
+    toggleAccountSelect(id: number) {
+        const idx = this.selectedAccountIds.indexOf(id);
         if (idx > -1) {
-            this.selectedIds.splice(idx, 1);
+            this.selectedAccountIds.splice(idx, 1);
         } else {
-            this.selectedIds.push(id);
+            this.selectedAccountIds.push(id);
         }
     }
 
-    isSelected(id: number): boolean {
-        return this.selectedIds.includes(id);
+    isAccountSelected(id: number): boolean {
+        return this.selectedAccountIds.includes(id);
     }
 
-    toggleSelectAll(event: any) {
+    toggleAccountSelectAll(event: any) {
         if (event.target.checked) {
-            this.selectedIds = this.pagedAccounts.map(a => a.id);
+            this.selectedAccountIds = this.pagedAccounts.map(a => a.id);
         } else {
-            this.selectedIds = [];
+            this.selectedAccountIds = [];
         }
     }
 
-    isAllSelected(): boolean {
-        return this.pagedAccounts.length > 0 && this.pagedAccounts.every(a => this.selectedIds.includes(a.id));
+    isAllAccountsSelected(): boolean {
+        return this.pagedAccounts.length > 0 && this.pagedAccounts.every(a => this.selectedAccountIds.includes(a.id));
     }
 
-    deleteSelected() {
-        if (this.selectedIds.length === 0) return;
+    deleteSelectedAccounts() {
+        if (this.selectedAccountIds.length === 0) return;
 
         Swal.fire({
             title: 'Are you sure?',
-            text: `You are about to delete ${this.selectedIds.length} account(s). You won\'t be able to revert this!`,
+            text: `You are about to delete ${this.selectedAccountIds.length} account(s). You won\'t be able to revert this!`,
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#34c38f',
@@ -288,24 +540,28 @@ export class AccountListComponent implements OnInit {
             confirmButtonText: 'Yes, delete it!'
         }).then((result) => {
             if (result.isConfirmed) {
-                const idsToDelete = [...this.selectedIds];
-                this.deleteSequentially(idsToDelete, 0);
+                const idsToDelete = [...this.selectedAccountIds];
+                this.deleteAccountsSequentially(idsToDelete, 0);
             }
         });
     }
 
-    private deleteSequentially(ids: number[], index: number) {
+    private deleteAccountsSequentially(ids: number[], index: number) {
         if (index >= ids.length) {
-            this.selectedIds = [];
-            this.fetchData();
+            this.selectedAccountIds = [];
+            this.fetchAccountsForProject(this.selectedProject.id);
+            this.fetchProjects(); // update counts
             Swal.fire('Deleted!', 'Selected accounts have been deleted.', 'success');
             return;
         }
         this.accountService.deleteAccount(ids[index]).subscribe({
-            next: () => this.deleteSequentially(ids, index + 1),
+            next: () => {
+                this.allAccounts = this.allAccounts.filter(a => a.id !== ids[index]);
+                this.deleteAccountsSequentially(ids, index + 1);
+            },
             error: (err) => {
                 console.error(`Error deleting account ${ids[index]}`, err);
-                this.deleteSequentially(ids, index + 1);
+                this.deleteAccountsSequentially(ids, index + 1);
             }
         });
     }
@@ -327,13 +583,15 @@ export class AccountListComponent implements OnInit {
             if (result.isConfirmed) {
                 this.accountService.deleteAccount(id).subscribe({
                     next: () => {
+                        this.allAccounts = this.allAccounts.filter(a => a.id !== id);
                         this.accountList = this.accountList.filter(a => a.id !== id);
-                        this.applyFilter();
-                        const maxPage = Math.ceil(this.total / this.itemsPerPage) || 1;
-                        if (this.page > maxPage) {
-                            this.page = maxPage;
+                        this.applyAccountFilter();
+                        const maxPage = Math.ceil(this.totalAccounts / this.accountItemsPerPage) || 1;
+                        if (this.accountPage > maxPage) {
+                            this.accountPage = maxPage;
                             this.updatePagedAccounts();
                         }
+                        this.fetchProjects(); // Update project counts
                         Swal.fire('Deleted!', 'Account has been deleted.', 'success');
                     },
                     error: (err) => {
@@ -361,7 +619,8 @@ export class AccountListComponent implements OnInit {
     private createAccountSequentially(accounts: any[], index: number) {
         if (index >= accounts.length) {
             this.isGenerating = false;
-            this.fetchData(); // Refresh full list from backend
+            this.hasFetchedAccounts = false;
+            this.fetchProjects(); // Refresh full list from backend
             return;
         }
 
@@ -415,6 +674,7 @@ export class AccountListComponent implements OnInit {
             const lastUpdated = new Date(now.getTime() - randomDaysAgo * 86400000).toISOString().split('T')[0];
 
             accounts.push({
+                projectId: Math.floor(Math.random() * 5) + 1, // map to mock projects 1-5
                 name: `${adj} ${template.platform} ${purpose} #${i + 1}`,
                 url: `${domain}${randomSuffix}`,
                 platformIcon: template.icon,
