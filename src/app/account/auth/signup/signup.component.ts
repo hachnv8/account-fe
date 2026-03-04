@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormsModule, ReactiveFormsModule, UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 
 import { AuthenticationService } from '../../../core/services/auth.service';
 import { environment } from '../../../../environments/environment';
@@ -9,12 +9,14 @@ import { UserProfileService } from '../../../core/services/user.service';
 import { Store } from '@ngrx/store';
 import { Register } from 'src/app/store/Authentication/authentication.actions';
 import { CommonModule } from '@angular/common';
+import { getError } from 'src/app/store/Authentication/authentication-selector';
+import { AlertModule } from 'ngx-bootstrap/alert';
 
 @Component({
-    selector: 'app-signup',
-    templateUrl: './signup.component.html',
-    styleUrls: ['./signup.component.scss'],
-    imports: [CommonModule, FormsModule, ReactiveFormsModule]
+  selector: 'app-signup',
+  templateUrl: './signup.component.html',
+  styleUrls: ['./signup.component.scss'],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, AlertModule, RouterModule]
 })
 export class SignupComponent implements OnInit {
 
@@ -35,6 +37,10 @@ export class SignupComponent implements OnInit {
       username: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
       password: ['', Validators.required],
+    });
+
+    this.store.select(getError).subscribe(err => {
+      this.error = err ? err : '';
     });
   }
 

@@ -131,7 +131,7 @@
 </div>
 
 <!-- Modal for View Login Details -->
-<div bsModal #loginDetailsModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="loginDetailsModalLabel" aria-hidden="true">
+<div bsModal #loginDetailsModal="bs-modal" [config]="{backdrop: 'static'}" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="loginDetailsModalLabel" aria-hidden="true" style="background: rgba(0,0,0,0.4); z-index: 1065 !important;">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
@@ -152,11 +152,11 @@
 </div>
 
 <!-- Modal for Add Account -->
-<div bsModal #addAccountModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="addAccountModalLabel" aria-hidden="true">
+<div bsModal #addAccountModal="bs-modal" [config]="{backdrop: 'static'}" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="addAccountModalLabel" aria-hidden="true" style="background: rgba(0,0,0,0.4); z-index: 1065 !important;">
   <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="addAccountModalLabel">Add New Account</h5>
+        <h5 class="modal-title" id="addAccountModalLabel">{{editingAccountId ? 'Edit Account' : 'Add New Account'}}</h5>
         <button type="button" class="btn-close" (click)="addAccountModal.hide()" aria-label="Close"></button>
       </div>
       <div class="modal-body">

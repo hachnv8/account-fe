@@ -5,13 +5,16 @@ import { AuthenticationService } from '../../../core/services/auth.service';
 import { Store } from '@ngrx/store';
 import { ActivatedRoute, Router } from '@angular/router';
 import { login } from 'src/app/store/Authentication/authentication.actions';
+import { getError } from 'src/app/store/Authentication/authentication-selector';
 import { CommonModule } from '@angular/common';
+import { AlertModule } from 'ngx-bootstrap/alert';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
-  imports: [CommonModule, FormsModule, ReactiveFormsModule]
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, AlertModule, RouterModule]
 })
 
 /**
@@ -39,6 +42,10 @@ export class LoginComponent implements OnInit {
     this.loginForm = this.formBuilder.group({
       email: ['admin@themesbrand.com', [Validators.required, Validators.email]],
       password: ['123456', [Validators.required]],
+    });
+
+    this.store.select(getError).subscribe(err => {
+      this.error = err ? err : '';
     });
   }
 

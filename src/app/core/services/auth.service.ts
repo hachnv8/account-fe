@@ -4,22 +4,23 @@ import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { User } from 'src/app/store/Authentication/auth.models';
 import { environment } from 'src/environments/environment';
+import { TokenStorageService } from './token-storage.service';
 
 @Injectable({ providedIn: 'root' })
 export class AuthenticationService {
 
     user: User | null = null;
 
-    constructor(private http: HttpClient) { }
+    constructor(private http: HttpClient, private tokenStorageService: TokenStorageService) { }
 
     /**
      * Returns the current user from localStorage
      */
     public currentUser(): User | null {
         if (!this.user) {
-            const storedUser = localStorage.getItem('currentUser');
-            if (storedUser) {
-                this.user = JSON.parse(storedUser);
+            const storedUser = this.tokenStorageService.getUser();
+            if (storedUser && Object.keys(storedUser).length > 0) {
+                this.user = storedUser;
             }
         }
         return this.user;
@@ -33,10 +34,13 @@ export class AuthenticationService {
     login(email: string, password: string): Observable<User> {
         return this.http.post<any>(`${environment.apiUrl}/auth/login`, { email, password }).pipe(
             map((response) => {
-                const user: User = response;
+                // Adjust for data wrapper if exist based on backend guides
+                // e.g., if response is { code: 1006, data: { token: '...', id: 1 ... } }
+                const user: User = response.data ? response.data : response;
+
                 if (user && user.token) {
-                    localStorage.setItem('currentUser', JSON.stringify(user));
-                    localStorage.setItem('token', user.token);
+                    this.tokenStorageService.saveUser(user);
+                    this.tokenStorageService.saveToken(user.token);
                     this.user = user;
                 }
                 return user;
@@ -64,8 +68,7 @@ export class AuthenticationService {
      * Logout the user
      */
     logout() {
-        localStorage.removeItem('currentUser');
-        localStorage.removeItem('token');
+        this.tokenStorageService.signOut();
         this.user = null;
     }
 }
