@@ -1,0 +1,243 @@
+<div class="container-fluid">
+
+  <app-page-title title="Project List" [breadcrumbItems]="breadCrumbItems"></app-page-title>
+
+  <div class="row">
+    <div class="col-lg-12">
+      <div class="card">
+        <div class="card-body">
+          <div class="row mb-2">
+            <div class="col-sm-4">
+              <div class="search-box me-2 mb-2 d-inline-block">
+                <div class="position-relative">
+                  <input type="text" class="form-control" placeholder="Search projects..." [(ngModel)]="searchTerm" (ngModelChange)="onSearch()">
+                  <i class="bx bx-search-alt search-icon"></i>
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-8">
+              <div class="text-sm-end">
+                <button type="button" class="btn btn-info btn-rounded waves-effect waves-light mb-2 me-2" (click)="refreshData()" [disabled]="isLoading">
+                  <i class="mdi mdi-refresh me-1"></i> Refresh
+                </button>
+                <button type="button" class="btn btn-success btn-rounded waves-effect waves-light mb-2" (click)="openAddProjectModal()"><i class="mdi mdi-plus me-1"></i> New Project</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Loading Spinner -->
+          @if(isLoading) {
+          <div class="d-flex justify-content-center align-items-center" style="min-height: 500px;">
+            <div class="text-center">
+              <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+              <p class="text-muted mt-3 mb-0">Loading data...</p>
+            </div>
+          </div>
+          }
+
+          <!-- No Data -->
+          @else if(totalProjects === 0) {
+          <div class="d-flex justify-content-center align-items-center" style="min-height: 500px;">
+            <div class="text-center">
+              <i class="bx bx-folder-open text-muted" style="font-size: 64px;"></i>
+              <h5 class="text-muted mt-3">No Projects</h5>
+              <p class="text-muted mb-0">There are no projects yet. Click <strong>New Project</strong> to add one.</p>
+            </div>
+          </div>
+          }
+
+          <!-- Data Table -->
+          @else {
+          <div class="table-responsive">
+            <table class="table align-middle table-nowrap table-hover dt-responsive nowrap w-100">
+              <thead class="table-light">
+                <tr>
+                  <th scope="col" style="width: 40px;">#</th>
+                  <th scope="col">Project Name</th>
+                  <th scope="col">Description</th>
+                  <th scope="col">Tech Stack</th>
+                  <th scope="col">Status</th>
+                  <th scope="col">Category</th>
+                  <th scope="col">Links</th>
+                  <th scope="col">Last Updated</th>
+                  <th scope="col" style="width: 120px;">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for(data of pagedProjects; track $index){
+                <tr>
+                  <td>
+                    <div class="avatar-xs">
+                      <span class="avatar-title rounded-circle bg-warning-subtle text-warning font-size-18">
+                        <i class="bx bxs-folder"></i>
+                      </span>
+                    </div>
+                  </td>
+                  <td>
+                    <h5 class="font-size-14 mb-0">{{data.name}}</h5>
+                  </td>
+                  <td>
+                    <p class="text-muted mb-0 text-truncate" style="max-width: 200px;" [title]="data.description || ''">
+                      {{data.description || '—'}}
+                    </p>
+                  </td>
+                  <td>
+                    @if(data.techStack && data.techStack.length > 0) {
+                      @for(tech of data.techStack; track $index) {
+                        <span class="badge badge-soft-info font-size-11 me-1">{{tech}}</span>
+                      }
+                    } @else {
+                      <span class="text-muted">—</span>
+                    }
+                  </td>
+                  <td>
+                    <span class="badge rounded-pill {{getStatusConfig(data.status).class}}">
+                      {{getStatusConfig(data.status).label}}
+                    </span>
+                  </td>
+                  <td>
+                    @if(data.category) {
+                      <span class="badge badge-soft-primary font-size-11">{{data.category}}</span>
+                    } @else {
+                      <span class="text-muted">—</span>
+                    }
+                  </td>
+                  <td>
+                    <ul class="list-inline font-size-18 contact-links mb-0">
+                      @if(data.repoUrl) {
+                      <li class="list-inline-item">
+                        <a [href]="data.repoUrl" target="_blank" class="text-dark" title="Repository">
+                          <i class="bx bxl-github"></i>
+                        </a>
+                      </li>
+                      }
+                      @if(data.prodUrl) {
+                      <li class="list-inline-item">
+                        <a [href]="data.prodUrl" target="_blank" class="text-primary" title="Live URL">
+                          <i class="bx bx-link-external"></i>
+                        </a>
+                      </li>
+                      }
+                      @if(!data.repoUrl && !data.prodUrl) {
+                        <span class="text-muted">—</span>
+                      }
+                    </ul>
+                  </td>
+                  <td>
+                    {{data.lastUpdated}}
+                  </td>
+                  <td>
+                    <ul class="list-unstyled hstack gap-1 mb-0">
+                      <li data-bs-toggle="tooltip" data-bs-placement="top" title="Edit">
+                        <a href="javascript:void(0);" class="btn btn-sm btn-soft-info" (click)="editProject(data)"><i class="mdi mdi-pencil-outline"></i></a>
+                      </li>
+                      <li data-bs-toggle="tooltip" data-bs-placement="top" title="Delete">
+                        <a href="javascript:void(0);" class="btn btn-sm btn-soft-danger" (click)="deleteProject(data)"><i class="mdi mdi-delete-outline"></i></a>
+                      </li>
+                    </ul>
+                  </td>
+                </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <div class="row">
+            <div class="col-sm-6">
+              <div class="mt-4 text-muted">
+                Showing {{ (projectPage - 1) * projectItemsPerPage + 1 }} to {{ projectPage * projectItemsPerPage > totalProjects ? totalProjects : projectPage * projectItemsPerPage }} of {{ totalProjects }} entries
+              </div>
+            </div>
+            <div class="col-sm-6">
+                <ul class="pagination justify-content-end mt-4">
+                    <pagination [totalItems]="totalProjects" [itemsPerPage]="projectItemsPerPage" [(ngModel)]="projectPage" (pageChanged)="projectPageChanged($event)" [maxSize]="5" [boundaryLinks]="true" previousText="‹" nextText="›" firstText="«" lastText="»"></pagination>
+                </ul>
+            </div>
+          </div>
+          }
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal for Add/Edit Project -->
+<div bsModal #addProjectModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="addProjectModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addProjectModalLabel">{{editingProjectId ? 'Edit Project' : 'Add New Project'}}</h5>
+        <button type="button" class="btn-close" (click)="addProjectModal.hide()" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="projectForm" (ngSubmit)="saveProject()">
+            <div class="row">
+
+                <div class="col-md-6 mb-3">
+                    <label for="projectName" class="form-label">Project Name <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="projectName" formControlName="name" placeholder="Ex: AInvest"
+                        [ngClass]="{ 'is-invalid': projectSubmitted && pf['name'].errors }" />
+                    @if(projectSubmitted && pf['name'].errors) {
+                        <div class="invalid-feedback">Project Name is required</div>
+                    }
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label for="category" class="form-label">Category</label>
+                    <select class="form-select" id="category" formControlName="category">
+                        <option value="">Select category</option>
+                        @for(cat of categoryOptions; track cat) {
+                            <option [value]="cat">{{cat}}</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-12 mb-3">
+                    <label for="description" class="form-label">Description</label>
+                    <input type="text" class="form-control" id="description" formControlName="description" placeholder="Short description of the project" />
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label for="techStack" class="form-label">Tech Stack</label>
+                    <input type="text" class="form-control" id="techStack" formControlName="techStack" placeholder="Ex: Angular, Spring Boot, PostgreSQL" />
+                    <small class="text-muted">Comma separated</small>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label for="projectStatus" class="form-label">Status</label>
+                    <select class="form-select" id="projectStatus" formControlName="status">
+                        <option value="">Select status</option>
+                        @for(st of statusOptions; track st.value) {
+                            <option [value]="st.value">{{st.label}}</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-12 mt-2">
+                    <h6 class="card-title mb-3"><i class="bx bx-link me-1"></i>Links</h6>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label for="repoUrl" class="form-label">Repository URL</label>
+                    <input type="text" class="form-control" id="repoUrl" formControlName="repoUrl" placeholder="https://github.com/..." />
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label for="prodUrl" class="form-label">Production / Live URL</label>
+                    <input type="text" class="form-control" id="prodUrl" formControlName="prodUrl" placeholder="https://myapp.com" />
+                </div>
+
+            </div>
+
+            <div class="text-end mt-3">
+                <button type="button" class="btn btn-secondary me-2" (click)="addProjectModal.hide()">Cancel</button>
+                <button type="submit" class="btn btn-success">{{editingProjectId ? 'Update Project' : 'Save Project'}}</button>
+            </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

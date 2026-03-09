@@ -190,6 +190,12 @@
         "PROFILE": "Profile"
       }
     },
+    "PROJECT_MANAGER": {
+      "TEXT": "Project Manager"
+    },
+    "NOTES": {
+      "TEXT": "Notes"
+    },
     "BLOG": {
       "TEXT": "Blog",
       "BADGE": "New",

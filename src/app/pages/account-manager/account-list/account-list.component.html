@@ -20,11 +20,6 @@
                 <button type="button" class="btn btn-info btn-rounded waves-effect waves-light mb-2 me-2" (click)="refreshData()" [disabled]="isLoading">
                   <i class="mdi mdi-refresh me-1"></i> Refresh
                 </button>
-                <button type="button" class="btn btn-warning btn-rounded waves-effect waves-light mb-2 me-2" (click)="autoGenerateAccounts()" [disabled]="isGenerating">
-                  <i class="mdi mdi-lightning-bolt me-1"></i>
-                  {{ isGenerating ? 'Generating... (' + generatedCount + '/50)' : 'Auto Account' }}
-                </button>
-                <button type="button" class="btn btn-success btn-rounded waves-effect waves-light mb-2" (click)="openAddProjectModal()"><i class="mdi mdi-plus me-1"></i> New Project</button>
               </div>
             </div><!-- end col-->
           </div>
@@ -72,8 +67,6 @@
                   <th scope="col" style="width: 40px;">#</th>
                   <th scope="col">Project Name</th>
                   <th scope="col">Accounts</th>
-                  <th scope="col">Last Updated</th>
-                  <th scope="col" style="width: 150px;">Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -90,19 +83,6 @@
                     <h5 class="font-size-14 mb-1"><a href="javascript: void(0);" class="text-dark">{{data.name}}</a></h5>
                   </td>
                   <td><span class="badge bg-primary rounded-pill">{{data.count}} accounts</span></td>
-                  <td>
-                    {{data.lastUpdated}}
-                  </td>
-                  <td>
-                    <ul class="list-unstyled hstack gap-1 mb-0">
-                      <li data-bs-toggle="tooltip" data-bs-placement="top" title="Edit">
-                        <a href="javascript:void(0);" class="btn btn-sm btn-soft-info" (click)="editProject(data, $event)"><i class="mdi mdi-pencil-outline"></i></a>
-                      </li>
-                      <li data-bs-toggle="tooltip" data-bs-placement="top" title="Delete">
-                        <a href="javascript:void(0);" data-bs-toggle="modal" class="btn btn-sm btn-soft-danger" (click)="deleteProject(data, $event)"><i class="mdi mdi-delete-outline"></i></a>
-                      </li>
-                    </ul>
-                  </td>
                 </tr>
                 }
               </tbody>
@@ -383,7 +363,7 @@
         }
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" (click)="projectDetailsModal.hide()">Close Full Project</button>
+        <button type="button" class="btn btn-secondary" (click)="projectDetailsModal.hide()">Close</button>
       </div>
     </div>
   </div>

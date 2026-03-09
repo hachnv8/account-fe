@@ -13,6 +13,18 @@ export const MENU: MenuItem[] = [
         isLayout: true
     },
     {
+        id: 9,
+        label: 'MENUITEMS.PROJECT_MANAGER.TEXT',
+        icon: 'bx-briefcase-alt-2',
+        link: '/project-manager'
+    },
+    {
+        id: 10,
+        label: 'MENUITEMS.NOTES.TEXT',
+        icon: 'bx-notepad',
+        link: '/notes'
+    },
+    {
         id: 3,
         label: 'MENUITEMS.ACCOUNT_MANAGER.TEXT',
         icon: 'bxs-user-detail',

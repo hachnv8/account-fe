@@ -40,8 +40,8 @@ export class LoginComponent implements OnInit {
     }
     // form validation
     this.loginForm = this.formBuilder.group({
-      email: ['admin@themesbrand.com', [Validators.required, Validators.email]],
-      password: ['123456', [Validators.required]],
+      email: ['vanhach97@gmail.com', [Validators.required, Validators.email]],
+      password: ['Hach1997!', [Validators.required]],
     });
 
     this.store.select(getError).subscribe(err => {
