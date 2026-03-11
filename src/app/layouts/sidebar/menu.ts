@@ -22,7 +22,20 @@ export const MENU: MenuItem[] = [
         id: 10,
         label: 'MENUITEMS.NOTES.TEXT',
         icon: 'bx-notepad',
-        link: '/notes'
+        subItems: [
+            {
+                id: 11,
+                label: 'MENUITEMS.NOTES.LIST.CHANGE_REQUESTS',
+                link: '/notes/change-requests',
+                parentId: 10
+            },
+            {
+                id: 12,
+                label: 'MENUITEMS.NOTES.LIST.NOTES',
+                link: '/notes/list',
+                parentId: 10
+            }
+        ]
     },
     {
         id: 3,

@@ -194,7 +194,11 @@
       "TEXT": "Project Manager"
     },
     "NOTES": {
-      "TEXT": "Notes"
+      "TEXT": "Notes",
+      "LIST": {
+        "CHANGE_REQUESTS": "Change Requests",
+        "NOTES": "Notes"
+      }
     },
     "BLOG": {
       "TEXT": "Blog",
