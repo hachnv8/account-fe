@@ -63,12 +63,17 @@
                 <div class="mb-3">
                   <label for="password" class="form-label">Password</label>
 
-                  <input type="password" formControlName="password" class="form-control" [ngClass]="{ 'is-invalid': submitted && f.password.errors }" id="password" placeholder="Password" />
-                  @if(submitted && f.password.errors){
-                  <div class="invalid-feedback">
-                    @if(f.password.errors.required){
-                    <div>Password is required</div>}
-                  </div>}
+                  <div class="input-group auth-pass-inputgroup">
+                    <input [type]="fieldTextType ? 'text' : 'password'" formControlName="password" class="form-control" [ngClass]="{ 'is-invalid': submitted && f.password.errors }" id="password" placeholder="Password" />
+                    <button class="btn btn-light ms-0" type="button" id="password-addon">
+                      <i class="mdi mdi-eye-outline" [ngClass]="{'mdi-eye-off-outline': !fieldTextType, 'mdi-eye-outline': fieldTextType}" (click)="toggleFieldTextType()"></i>
+                    </button>
+                    @if(submitted && f.password.errors){
+                    <div class="invalid-feedback">
+                      @if(f.password.errors.required){
+                      <div>Password is required</div>}
+                    </div>}
+                  </div>
                 </div>
 
                 <div class="mt-4 d-grid">

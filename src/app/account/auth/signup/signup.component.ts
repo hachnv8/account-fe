@@ -24,6 +24,7 @@ export class SignupComponent implements OnInit {
   submitted: any = false;
   error: any = '';
   successmsg: any = false;
+  fieldTextType: boolean;
 
   // set the currenr year
   year: number = new Date().getFullYear();
@@ -46,6 +47,10 @@ export class SignupComponent implements OnInit {
 
   // convenience getter for easy access to form fields
   get f() { return this.signupForm.controls; }
+
+  toggleFieldTextType() {
+    this.fieldTextType = !this.fieldTextType;
+  }
 
   /**
    * On submit form

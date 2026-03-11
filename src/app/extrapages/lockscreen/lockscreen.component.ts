@@ -1,10 +1,11 @@
 import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 
 @Component({
     selector: 'app-lockscreen',
     templateUrl: './lockscreen.component.html',
     styleUrls: ['./lockscreen.component.scss'],
-    imports: []
+    imports: [CommonModule]
 })
 
 /**
@@ -12,6 +13,7 @@ import { Component, OnInit } from '@angular/core';
  */
 export class LockscreenComponent implements OnInit {
 
+  fieldTextType: boolean;
   // set the currenr year
   year: number = new Date().getFullYear();
 
@@ -20,4 +22,7 @@ export class LockscreenComponent implements OnInit {
   ngOnInit(): void {
   }
 
+  toggleFieldTextType() {
+    this.fieldTextType = !this.fieldTextType;
+  }
 }
