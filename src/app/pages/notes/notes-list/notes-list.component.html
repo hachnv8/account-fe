@@ -1,1 +1,202 @@
-<p>notes-list works!</p>
+<div class="container-fluid">
+
+  <app-page-title title="Notes List" [breadcrumbItems]="breadCrumbItems"></app-page-title>
+
+  <div class="row">
+    <div class="col-lg-12">
+      <div class="card">
+        <div class="card-body">
+          <div class="row mb-2">
+            <div class="col-sm-4">
+              <div class="search-box me-2 mb-2 d-inline-block">
+                <div class="position-relative">
+                  <input type="text" class="form-control" placeholder="Search notes..." [(ngModel)]="searchTerm" (ngModelChange)="onSearch()">
+                  <i class="bx bx-search-alt search-icon"></i>
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-8">
+              <div class="text-sm-end">
+                <button type="button" class="btn btn-info btn-rounded waves-effect waves-light mb-2 me-2" (click)="refreshData()" [disabled]="isLoading">
+                  <i class="mdi mdi-refresh me-1"></i> Refresh
+                </button>
+                <button type="button" class="btn btn-success btn-rounded waves-effect waves-light mb-2" (click)="editNote({id:0, title:'', content:'', projectName:'', type:'other', priority:'medium', status:'open', createdBy:'', createdAt:'', updatedAt:''})">
+                  <i class="mdi mdi-plus me-1"></i> New Note
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Loading Spinner -->
+          @if(isLoading) {
+          <div class="d-flex justify-content-center align-items-center" style="min-height: 400px;">
+            <div class="text-center">
+              <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+              <p class="text-muted mt-3 mb-0">Loading notes...</p>
+            </div>
+          </div>
+          }
+
+          <!-- No Data -->
+          @else if(totalNotes === 0) {
+          <div class="d-flex justify-content-center align-items-center" style="min-height: 400px;">
+            <div class="text-center">
+              <i class="bx bx-notepad text-muted" style="font-size: 64px;"></i>
+              <h5 class="text-muted mt-3">No Notes Found</h5>
+              <p class="text-muted mb-0">There are no notes yet. Click <strong>New Note</strong> to add one.</p>
+            </div>
+          </div>
+          }
+
+          <!-- Data Table -->
+          @else {
+          <div class="table-responsive">
+            <table class="table align-middle table-nowrap table-hover dt-responsive nowrap w-100">
+              <thead class="table-light">
+                <tr>
+                  <th scope="col" style="width: 40px;">#</th>
+                  <th scope="col">Title</th>
+                  <th scope="col">Project</th>
+                  <th scope="col">Type</th>
+                  <th scope="col">Priority</th>
+                  <th scope="col">Status</th>
+                  <th scope="col">Created By</th>
+                  <th scope="col">Created At</th>
+                  <th scope="col" style="width: 130px;">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for(note of pagedNotes; track note.id) {
+                <tr>
+                  <td>
+                    <div class="avatar-xs">
+                      <span class="avatar-title rounded-circle font-size-16" [ngClass]="getTypeConfig(note.type).class">
+                        <i [class]="getTypeConfig(note.type).icon"></i>
+                      </span>
+                    </div>
+                  </td>
+                  <td>
+                    <h5 class="font-size-14 mb-1">
+                      <a href="javascript:void(0);" class="text-dark" (click)="viewNote(note)">{{note.title}}</a>
+                    </h5>
+                    <p class="text-muted mb-0 text-truncate" style="max-width: 280px;">{{note.content}}</p>
+                  </td>
+                  <td>
+                    <span class="badge bg-primary-subtle text-primary font-size-11">
+                      <i class="bx bxs-folder me-1"></i>{{note.projectName}}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="badge font-size-11" [ngClass]="getTypeConfig(note.type).class">
+                      {{getTypeConfig(note.type).label}}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="badge rounded-pill" [ngClass]="getPriorityConfig(note.priority).class">
+                      {{getPriorityConfig(note.priority).label}}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="badge rounded-pill" [ngClass]="getStatusConfig(note.status).class">
+                      {{getStatusConfig(note.status).label}}
+                    </span>
+                  </td>
+                  <td>{{note.createdBy}}</td>
+                  <td>{{note.createdAt | date:'mediumDate'}}</td>
+                  <td>
+                    <ul class="list-unstyled hstack gap-1 mb-0">
+                      <li data-bs-toggle="tooltip" data-bs-placement="top" title="View">
+                        <a href="javascript:void(0);" class="btn btn-sm btn-soft-primary" (click)="viewNote(note)"><i class="mdi mdi-eye-outline"></i></a>
+                      </li>
+                      <li data-bs-toggle="tooltip" data-bs-placement="top" title="Edit">
+                        <a href="javascript:void(0);" class="btn btn-sm btn-soft-info" (click)="editNote(note)"><i class="mdi mdi-pencil-outline"></i></a>
+                      </li>
+                      <li data-bs-toggle="tooltip" data-bs-placement="top" title="Delete">
+                        <a href="javascript:void(0);" class="btn btn-sm btn-soft-danger" (click)="deleteNote(note)"><i class="mdi mdi-delete-outline"></i></a>
+                      </li>
+                    </ul>
+                  </td>
+                </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <div class="row">
+            <div class="col-sm-6">
+              <div class="mt-4 text-muted">
+                Showing {{ (notesPage - 1) * notesItemsPerPage + 1 }} to {{ notesPage * notesItemsPerPage > totalNotes ? totalNotes : notesPage * notesItemsPerPage }} of {{ totalNotes }} entries
+              </div>
+            </div>
+            <div class="col-sm-6">
+                <ul class="pagination justify-content-end mt-4">
+                    <pagination [totalItems]="totalNotes" [itemsPerPage]="notesItemsPerPage" [(ngModel)]="notesPage" (pageChanged)="notesPageChanged($event)" [maxSize]="5" [boundaryLinks]="true" previousText="‹" nextText="›" firstText="«" lastText="»"></pagination>
+                </ul>
+            </div>
+          </div>
+          }
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- View Note Detail Modal -->
+<div bsModal #viewNoteModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="viewNoteModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="viewNoteModalLabel">
+          <i class="bx bx-note me-2"></i>Note Details
+        </h5>
+        <button type="button" class="btn-close" (click)="viewNoteModal.hide()" aria-label="Close"></button>
+      </div>
+      @if(selectedNote) {
+      <div class="modal-body">
+        <div class="mb-3">
+          <h5 class="font-size-16">{{selectedNote.title}}</h5>
+          <div class="d-flex flex-wrap gap-2 mt-2">
+            <span class="badge bg-primary-subtle text-primary"><i class="bx bxs-folder me-1"></i>{{selectedNote.projectName}}</span>
+            <span class="badge font-size-11" [ngClass]="getTypeConfig(selectedNote.type).class">{{getTypeConfig(selectedNote.type).label}}</span>
+            <span class="badge rounded-pill" [ngClass]="getPriorityConfig(selectedNote.priority).class">{{getPriorityConfig(selectedNote.priority).label}}</span>
+            <span class="badge rounded-pill" [ngClass]="getStatusConfig(selectedNote.status).class">{{getStatusConfig(selectedNote.status).label}}</span>
+          </div>
+        </div>
+
+        <hr>
+
+        <div class="mb-3">
+          <label class="form-label text-muted fw-semibold"><i class="bx bx-detail me-1"></i>Content</label>
+          <p class="text-dark mb-0" style="white-space: pre-wrap;">{{selectedNote.content}}</p>
+        </div>
+
+        <hr>
+
+        <div class="row">
+          <div class="col-md-4">
+            <label class="form-label text-muted mb-1"><i class="bx bx-user me-1"></i>Created By</label>
+            <p class="fw-medium mb-0">{{selectedNote.createdBy}}</p>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label text-muted mb-1"><i class="bx bx-calendar me-1"></i>Created At</label>
+            <p class="fw-medium mb-0">{{selectedNote.createdAt | date:'medium'}}</p>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label text-muted mb-1"><i class="bx bx-calendar-check me-1"></i>Last Updated</label>
+            <p class="fw-medium mb-0">{{selectedNote.updatedAt | date:'medium'}}</p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="viewNoteModal.hide()">Close</button>
+        <button type="button" class="btn btn-info" (click)="viewNoteModal.hide(); editNote(selectedNote!)">
+          <i class="mdi mdi-pencil-outline me-1"></i>Edit
+        </button>
+      </div>
+      }
+    </div>
+  </div>
+</div>
