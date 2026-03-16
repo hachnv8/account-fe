@@ -35,6 +35,9 @@ export class AccountListComponent implements OnInit {
     pagedAccounts: any[] = [];
 
     selectedAccount: any;
+    accountToCopy: any;
+    copyTargetProjectId: string = '';
+    targetProjects: any[] = [];
     loginDetailsContent: string = '';
     loginDetailEntries: { key: string, value: string }[] = [];
 
@@ -94,6 +97,7 @@ export class AccountListComponent implements OnInit {
     @ViewChild('addAccountModal', { static: false }) addAccountModal?: ModalDirective;
     @ViewChild('projectDetailsModal', { static: false }) projectDetailsModal?: ModalDirective;
     @ViewChild('addProjectModal', { static: false }) addProjectModal?: ModalDirective;
+    @ViewChild('copyAccountModal', { static: false }) copyAccountModal?: ModalDirective;
 
     constructor(private accountService: AccountService, private formBuilder: FormBuilder) { }
 
@@ -480,6 +484,12 @@ export class AccountListComponent implements OnInit {
             url: account.url,
             ...account.loginDetails
         };
+
+        // Remove notes if empty as requested
+        if (!details.notes) {
+            delete details.notes;
+        }
+
         this.loginDetailsContent = JSON.stringify(details, null, 2);
         this.loginDetailsModal?.show();
     }
@@ -534,6 +544,57 @@ export class AccountListComponent implements OnInit {
             });
             this.addAccountModal?.show();
         }
+    }
+
+    /**
+     * Open copy account modal
+     */
+    copyAccount(account: any) {
+        this.accountToCopy = account;
+        this.copyTargetProjectId = '';
+        // Filter out current project
+        this.targetProjects = this.projectList.filter(p => p.id !== account.projectId);
+        this.copyAccountModal?.show();
+    }
+
+    /**
+     * Execute copy logic
+     */
+    executeCopyAccount() {
+        if (!this.copyTargetProjectId || !this.accountToCopy) return;
+
+        this.isLoading = true;
+
+        const newAccount = {
+            ...this.accountToCopy,
+            id: undefined, // New ID will be generated
+            projectId: Number(this.copyTargetProjectId),
+            lastUpdated: new Date().toISOString().split('T')[0]
+        };
+
+        this.accountService.addAccount(newAccount).subscribe({
+            next: (response) => {
+                this.copyAccountModal?.hide();
+                // Refresh accounts
+                this.hasFetchedAccounts = false;
+                if (this.selectedProject) {
+                   this.fetchAccountsForProject(this.selectedProject.id);
+                }
+                this.isLoading = false;
+                Swal.fire({
+                    title: 'Success!',
+                    text: 'Account copied successfully.',
+                    icon: 'success',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            },
+            error: (err) => {
+                console.error('Error copying account', err);
+                this.isLoading = false;
+                Swal.fire('Error!', 'Failed to copy account. Please try again.', 'error');
+            }
+        });
     }
 
     // ========== Multi-select ==========

@@ -308,6 +308,9 @@
                       <a href="javascript:void(0);" (click)="viewLoginDetails(data)" tooltip="View Details"><i class="bx bx-show"></i></a>
                     </li>
                     <li class="list-inline-item px-2">
+                      <a href="javascript:void(0);" (click)="copyAccount(data)" tooltip="Copy to Project"><i class="bx bx-duplicate text-warning"></i></a>
+                    </li>
+                    <li class="list-inline-item px-2">
                       <a href="javascript:void(0);" (click)="editAccount(data.id)" tooltip="Edit"><i class="bx bx-pencil text-success"></i></a>
                     </li>
                     <li class="list-inline-item px-2">
@@ -347,6 +350,34 @@
       </div>
     </div>
   </div>
+</div>
+
+<!-- Copy Account Modal -->
+<div bsModal #copyAccountModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="copyAccountModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="copyAccountModalLabel">Copy Account to Project</h5>
+                <button type="button" class="btn-close" (click)="copyAccountModal.hide()" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Select target project to copy <strong>{{accountToCopy?.name}}</strong>:</p>
+                <div class="mb-3">
+                    <label for="copyTargetProject" class="form-label">Target Project</label>
+                    <select class="form-select" id="copyTargetProject" [(ngModel)]="copyTargetProjectId">
+                        <option value="">Select a project</option>
+                        @for(project of targetProjects; track project.id) {
+                            <option [value]="project.id">{{project.name}}</option>
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="copyAccountModal.hide()">Cancel</button>
+                <button type="button" class="btn btn-primary" (click)="executeCopyAccount()" [disabled]="!copyTargetProjectId">Copy Account</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- Modal for Add Project -->
