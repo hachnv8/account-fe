@@ -197,7 +197,8 @@
       "TEXT": "Notes",
       "LIST": {
         "CHANGE_REQUESTS": "Change Requests",
-        "NOTES": "Notes"
+        "NOTES": "Notes",
+        "DICTIONARY": "Note Dictionary"
       }
     },
     "BLOG": {

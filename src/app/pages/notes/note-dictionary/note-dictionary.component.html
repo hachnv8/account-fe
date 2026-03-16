@@ -1,0 +1,68 @@
+<div class="dictionary-container mt-4 mb-5">
+  <div class="dictionary-mock-modal">
+    <!-- Header Search Input -->
+    <div class="dictionary-header">
+      <i class="bx bx-search search-icon"></i>
+      <input type="text" class="dictionary-input" placeholder="Search all sources with AI..." [(ngModel)]="searchTerm">
+      <div class="dictionary-filters">
+        <i class="bx bx-slider-alt"></i> Filters
+      </div>
+    </div>
+
+    <!-- Secondary Search Info (Like Notion's "Search all sources with AI") -->
+    <div class="dictionary-sub-header" *ngIf="searchTerm">
+      <i class="bx bx-search search-sub-icon"></i>
+      <span class="sub-text">Search all sources with AI 
+        <span class="badges-group">
+          <span class="badge-icon"><i class="bx bx-notepad"></i></span>
+          <span class="badge-icon"><i class="bx bx-send"></i></span>
+          <span class="badge-icon"><i class="bx bx-calendar"></i></span>
+          <span class="badge-num">+12</span>
+        </span>
+        — "{{ searchTerm }}"
+      </span>
+      <i class="bx bx-arrow-back enter-icon"></i>
+    </div>
+
+    <!-- Quick Matches Section -->
+    <div class="dictionary-body">
+      <div class="section-title">Quick matches</div>
+      
+      <div class="results-list">
+        <!-- Result Items -->
+        <a href="javascript:void(0);" class="result-item" *ngFor="let item of quickMatches">
+          <div class="item-icon">
+            <i [class]="item.icon + ' ' + (item.iconColorClass ? item.iconColorClass : '')"></i>
+          </div>
+          <div class="item-content">
+            <div class="item-title-row">
+              <span class="item-title" [innerHTML]="item.title | titlecase"></span>
+            </div>
+            <div class="item-meta">
+              <span class="item-path" *ngIf="item.path">{{ item.path }} &bull; </span>
+              <span class="item-author">{{ item.author }}</span>
+              <span class="item-date"> &bull; Edited {{ item.date }}</span>
+            </div>
+            <div class="item-snippet" *ngIf="item.snippet">
+              {{ item.snippet }}
+            </div>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <!-- Footer Commands -->
+    <div class="dictionary-footer">
+      <div class="footer-shortcuts">
+        <span class="shortcut"><strong>Ctrl+&crarr;</strong> Open in new tab</span>
+        <span class="shortcut"><strong>Ctrl+L</strong> Copy link</span>
+        <span class="shortcut"><strong>Shift+Ctrl+K</strong> Command Search</span>
+      </div>
+      <div class="footer-actions">
+        <i class="bx bx-like action-btn"></i>
+        <i class="bx bx-dislike action-btn"></i>
+      </div>
+    </div>
+
+  </div>
+</div>
