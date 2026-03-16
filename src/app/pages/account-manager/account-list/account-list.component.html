@@ -174,19 +174,9 @@
                     }
                 </div>
 
-                <div class="col-md-6 mb-3">
-                    <label for="tags" class="form-label">Tags (comma separated)</label>
-                    <input type="text" class="form-control" id="tags" formControlName="tags" placeholder="Ex: Social, Marketing" />
-                </div>
 
-                <div class="col-md-6 mb-3">
-                    <label for="platform" class="form-label">Platform Type</label>
-                    <select class="form-select" id="platform" formControlName="platformIcon">
-                        @for(option of platformOptions; track option) {
-                           <option [value]="option.icon">{{option.name}}</option>
-                        }
-                    </select>
-                </div>
+
+
 
                 <div class="col-12 mt-3">
                     <h5 class="card-title mb-3">Login Details</h5>
@@ -286,7 +276,6 @@
                 <th scope="col" style="width: 40px;">#</th>
                 <th scope="col">Name</th>
                 <th scope="col">Url / IP</th>
-                <th scope="col">Tags</th>
                 <th scope="col">Last Updated</th>
                 <th scope="col" style="width: 150px;">Action</th>
               </tr>
@@ -310,15 +299,6 @@
                   <h5 class="font-size-14 mb-1"><a href="javascript: void(0);" class="text-dark">{{data.name}}</a></h5>
                 </td>
                 <td>{{data.url}}</td>
-                <td>
-                  <div>
-                    @if(data.tags && data.tags.length > 0) {
-                      @for(tag of data.tags; track $index) {
-                        <a href="javascript: void(0);" class="badge badge-soft-primary font-size-11 m-1">{{tag}}</a>
-                      }
-                    }
-                  </div>
-                </td>
                 <td>
                   {{data.lastUpdated}}
                 </td>
@@ -387,6 +367,10 @@
                     @if(projectSubmitted && pf['name'].errors) {
                         <div class="invalid-feedback">Project Name is required</div>
                     }
+                </div>
+                <div class="col-12 mb-3">
+                    <label for="projectUrl" class="form-label">Url / IP</label>
+                    <input type="text" class="form-control" id="projectUrl" formControlName="prodUrl" placeholder="Ex: business.facebook.com or 192.168.1.1" />
                 </div>
             </div>
 

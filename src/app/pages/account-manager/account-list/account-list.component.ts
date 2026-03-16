@@ -75,6 +75,7 @@ export class AccountListComponent implements OnInit {
 
     // Platform options for the automated icon selection
     platformOptions = [
+        { name: 'Unknown', icon: 'bx bx-globe', needsPort: false },
         { name: 'Facebook', icon: 'bx bxl-facebook-square', needsPort: false },
         { name: 'Google', icon: 'bx bxl-google', needsPort: false },
         { name: 'SSH/Terminal', icon: 'bx bxs-terminal', needsPort: true },
@@ -211,9 +212,8 @@ export class AccountListComponent implements OnInit {
         this.accountForm = this.formBuilder.group({
             projectId: ['', Validators.required],
             name: ['', Validators.required],
-            url: ['', Validators.required],
-            platformIcon: [this.platformOptions[0].icon, Validators.required],
-            tags: [''], // Comma separated
+            url: [''],
+            platformIcon: [''], // Will be set to a default if still needed by backend
             // Login Details Group
             username: [''],
             password: [''],
@@ -222,7 +222,18 @@ export class AccountListComponent implements OnInit {
         });
 
         this.projectForm = this.formBuilder.group({
-            name: ['', Validators.required]
+            name: ['', Validators.required],
+            prodUrl: ['']
+        });
+
+        // Listen for project selection changes in account form
+        this.accountForm.get('projectId')?.valueChanges.subscribe(projectId => {
+            if (projectId) {
+                const project = this.projectList.find(p => p.id == projectId);
+                if (project && project.prodUrl) {
+                    this.accountForm.patchValue({ url: project.prodUrl }, { emitEvent: false });
+                }
+            }
         });
     }
 
@@ -243,9 +254,14 @@ export class AccountListComponent implements OnInit {
         this.submitted = false;
         this.editingAccountId = null;
         this.accountForm.reset();
+        
+        const defaultProjectId = this.selectedProject ? this.selectedProject.id : '';
+        const defaultUrl = this.selectedProject ? this.selectedProject.prodUrl : '';
+
         this.accountForm.patchValue({
             platformIcon: this.platformOptions[0].icon,
-            projectId: this.selectedProject ? this.selectedProject.id : ''
+            projectId: defaultProjectId,
+            url: defaultUrl
         });
         this.addAccountModal?.show();
     }
@@ -283,8 +299,7 @@ export class AccountListComponent implements OnInit {
             projectId: formValues.projectId,
             name: formValues.name,
             url: formValues.url,
-            platformIcon: formValues.platformIcon,
-            tags: formValues.tags ? formValues.tags.split(',').map((tag: string) => tag.trim()) : [],
+            platformIcon: this.platformOptions[0].icon, // Use default or handled by backend
             lastUpdated: new Date().toISOString().split('T')[0],
             loginDetails: loginDetails
         };
@@ -341,6 +356,7 @@ export class AccountListComponent implements OnInit {
 
         const projectData = {
             name: this.projectForm.value.name,
+            prodUrl: this.projectForm.value.prodUrl,
             count: 0,
             lastUpdated: new Date().toISOString().split('T')[0] // Only update last updated on create
         };
@@ -351,7 +367,8 @@ export class AccountListComponent implements OnInit {
             // Edit existing project
             const updateData = {
                 id: this.editingProjectId,
-                name: projectData.name
+                name: projectData.name,
+                prodUrl: projectData.prodUrl
             };
 
             this.accountService.updateProject(this.editingProjectId, updateData).subscribe({
@@ -359,6 +376,7 @@ export class AccountListComponent implements OnInit {
                     const idx = this.projectList.findIndex(p => p.id === this.editingProjectId);
                     if (idx > -1) {
                         this.projectList[idx].name = updateData.name;
+                        this.projectList[idx].prodUrl = updateData.prodUrl;
                     }
                     this.applyProjectFilter();
                     this.isLoading = false;
@@ -396,7 +414,8 @@ export class AccountListComponent implements OnInit {
         event.stopPropagation(); // prevent opening the project accounts modal
         this.editingProjectId = project.id;
         this.projectForm.patchValue({
-            name: project.name
+            name: project.name,
+            prodUrl: project.prodUrl || ''
         });
         this.addProjectModal?.show();
     }
@@ -499,11 +518,8 @@ export class AccountListComponent implements OnInit {
 
         const account = this.allAccounts.find(a => a.id === id);
         if (account) {
-            let tagsStr = '';
             if (account.tags && Array.isArray(account.tags)) {
-                tagsStr = account.tags.join(', ');
-            } else if (account.tags) {
-                tagsStr = account.tags;
+                // tags are no longer used in the form
             }
 
             this.accountForm.patchValue({
@@ -511,7 +527,6 @@ export class AccountListComponent implements OnInit {
                 name: account.name,
                 url: account.url,
                 platformIcon: account.platformIcon,
-                tags: tagsStr,
                 username: account.loginDetails?.username || '',
                 password: account.loginDetails?.password || '',
                 port: account.loginDetails?.port || '',

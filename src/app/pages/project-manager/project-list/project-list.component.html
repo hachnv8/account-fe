@@ -130,6 +130,9 @@
                   </td>
                   <td>
                     <ul class="list-unstyled hstack gap-1 mb-0">
+                      <li data-bs-toggle="tooltip" data-bs-placement="top" title="View">
+                        <a href="javascript:void(0);" class="btn btn-sm btn-soft-primary" (click)="viewProjectDetails(data)"><i class="mdi mdi-eye-outline"></i></a>
+                      </li>
                       <li data-bs-toggle="tooltip" data-bs-placement="top" title="Edit">
                         <a href="javascript:void(0);" class="btn btn-sm btn-soft-info" (click)="editProject(data)"><i class="mdi mdi-pencil-outline"></i></a>
                       </li>
@@ -169,11 +172,15 @@
   <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="addProjectModalLabel">{{editingProjectId ? 'Edit Project' : 'Add New Project'}}</h5>
+        <h5 class="modal-title" id="addProjectModalLabel">
+          @if(isViewOnly) { View Project }
+          @else { {{editingProjectId ? 'Edit Project' : 'Add New Project'}} }
+        </h5>
         <button type="button" class="btn-close" (click)="addProjectModal.hide()" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <form [formGroup]="projectForm" (ngSubmit)="saveProject()">
+            <fieldset [disabled]="isViewOnly">
             <div class="row">
 
                 <div class="col-md-6 mb-3">
@@ -231,10 +238,13 @@
                 </div>
 
             </div>
+            </fieldset>
 
             <div class="text-end mt-3">
                 <button type="button" class="btn btn-secondary me-2" (click)="addProjectModal.hide()">Cancel</button>
-                <button type="submit" class="btn btn-success">{{editingProjectId ? 'Update Project' : 'Save Project'}}</button>
+                @if(!isViewOnly) {
+                   <button type="submit" class="btn btn-success">{{editingProjectId ? 'Update Project' : 'Save Project'}}</button>
+                }
             </div>
         </form>
       </div>

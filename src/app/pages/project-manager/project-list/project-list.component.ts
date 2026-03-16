@@ -37,6 +37,7 @@ export class ProjectListComponent implements OnInit {
     projectForm: FormGroup;
     projectSubmitted: boolean = false;
     editingProjectId: number | null = null;
+    isViewOnly: boolean = false;
 
     // Status options
     statusOptions = [
@@ -148,6 +149,7 @@ export class ProjectListComponent implements OnInit {
     openAddProjectModal() {
         this.projectSubmitted = false;
         this.editingProjectId = null;
+        this.isViewOnly = false;
         this.projectForm.reset();
         this.projectForm.patchValue({ status: 'active' });
         this.addProjectModal?.show();
@@ -216,6 +218,23 @@ export class ProjectListComponent implements OnInit {
     // Edit Project
     editProject(project: any) {
         this.editingProjectId = project.id;
+        this.isViewOnly = false;
+        this.projectForm.patchValue({
+            name: project.name,
+            description: project.description || '',
+            techStack: project.techStack ? project.techStack.join(', ') : '',
+            status: project.status || 'active',
+            category: project.category || '',
+            repoUrl: project.repoUrl || '',
+            prodUrl: project.prodUrl || ''
+        });
+        this.addProjectModal?.show();
+    }
+
+    // View Project Details
+    viewProjectDetails(project: any) {
+        this.editingProjectId = project.id;
+        this.isViewOnly = true;
         this.projectForm.patchValue({
             name: project.name,
             description: project.description || '',
