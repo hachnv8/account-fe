@@ -303,7 +303,7 @@ export class AccountListComponent implements OnInit {
             projectId: formValues.projectId,
             name: formValues.name,
             url: formValues.url,
-            platformIcon: this.platformOptions[0].icon, // Use default or handled by backend
+            platformIcon: formValues.platformIcon,
             lastUpdated: new Date().toISOString().split('T')[0],
             loginDetails: loginDetails
         };

@@ -174,7 +174,14 @@
                     }
                 </div>
 
-
+                <div class="col-md-6 mb-3">
+                    <label for="platformIcon" class="form-label">Platform Type</label>
+                    <select class="form-select" id="platformIcon" formControlName="platformIcon">
+                        @for(platform of platformOptions; track platform.icon) {
+                            <option [value]="platform.icon">{{platform.name}}</option>
+                        }
+                    </select>
+                </div>
 
 
 
