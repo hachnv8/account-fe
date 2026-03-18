@@ -155,7 +155,27 @@
         <button type="button" class="btn-close" (click)="loginDetailsModal.hide()" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <pre class="bg-light p-3 rounded" style="white-space: pre-wrap;">{{loginDetailsContent}}</pre>
+        <div class="table-responsive">
+          <table class="table table-nowrap mb-0">
+            <tbody>
+              @for(entry of loginDetailEntries; track entry.key) {
+              <tr>
+                <th scope="row" style="width: 120px;" class="border-0">{{entry.key | titlecase}}:</th>
+                <td class="border-0">
+                  <div class="d-flex align-items-center">
+                    <span class="text-muted fw-medium me-2">{{entry.value || 'N/A'}}</span>
+                    @if(entry.value) {
+                    <a href="javascript:void(0);" (click)="copyField(entry.value, $event)" class="text-primary font-size-16" tooltip="Copy">
+                      <i class="bx bx-copy"></i>
+                    </a>
+                    }
+                  </div>
+                </td>
+              </tr>
+              }
+            </tbody>
+          </table>
+        </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" (click)="loginDetailsModal.hide()">Close</button>

@@ -442,7 +442,7 @@ export class AccountListComponent implements OnInit {
     viewLoginDetails(account: any) {
         this.selectedAccount = account;
         // Include url/ip along with loginDetails
-        const details = {
+        const details: any = {
             url: account.url,
             ...account.loginDetails
         };
@@ -453,6 +453,13 @@ export class AccountListComponent implements OnInit {
         }
 
         this.loginDetailsContent = JSON.stringify(details, null, 2);
+        
+        // Prepare entries for individual copying
+        this.loginDetailEntries = Object.entries(details).map(([key, value]) => ({
+            key: key,
+            value: value as string
+        }));
+
         this.loginDetailsModal?.show();
     }
 
@@ -463,21 +470,39 @@ export class AccountListComponent implements OnInit {
         // Use the navigator clipboard API
         if (this.loginDetailsContent) {
             navigator.clipboard.writeText(this.loginDetailsContent).then(() => {
-                // Optional: Show a toast or alert. using simple alert for now as no Toastr service added here yet
-                // alert('Copied to clipboard!'); 
-                // Ideally we can change the button text temporarily to "Copied!"
                 const copyBtn = document.getElementById('btn-copy-clipboard') as HTMLElement;
                 if (copyBtn) {
-                    const originalText = copyBtn.innerText;
-                    copyBtn.innerText = 'Copied!';
+                    const originalText = copyBtn.innerHTML;
+                    copyBtn.innerHTML = '<i class="bx bx-check me-1"></i> Copied!';
                     setTimeout(() => {
-                        copyBtn.innerText = originalText;
+                        copyBtn.innerHTML = originalText;
                     }, 2000);
                 }
             }).catch(err => {
                 console.error('Could not copy text: ', err);
             });
         }
+    }
+
+    /**
+     * Copy specific field to clipboard
+     */
+    copyField(value: string, event: MouseEvent) {
+        if (!value) return;
+        
+        navigator.clipboard.writeText(value).then(() => {
+            const target = event.currentTarget as HTMLElement;
+            const icon = target.querySelector('i');
+            if (icon) {
+                const originalClass = icon.className;
+                icon.className = 'bx bx-check text-success';
+                setTimeout(() => {
+                    icon.className = originalClass;
+                }, 2000);
+            }
+        }).catch(err => {
+            console.error('Could not copy field: ', err);
+        });
     }
 
     /**
