@@ -1,0 +1,76 @@
+.note-create-wrapper {
+  background-color: #fff;
+  min-height: calc(100vh - 70px);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  border-radius: 4px;
+  box-shadow: 0 0.75rem 1.5rem rgba(18,38,63,.03);
+}
+
+.note-action-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 24px;
+  border-bottom: 1px solid #f6f6f6;
+  position: sticky;
+  top: 70px; /* Offset for header */
+  background: white;
+  z-index: 100;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+}
+
+.note-editor-container {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  padding: 40px 0;
+  overflow-y: auto;
+}
+
+.note-editor-content {
+  width: 100%;
+  max-width: 900px;
+  padding: 0 40px;
+}
+
+.note-title-wrapper {
+  margin-bottom: 20px;
+  padding-left: 56px; /* Align with EditorJS block text */
+}
+
+.note-title-input {
+  width: 100%;
+  border: none;
+  outline: none;
+  font-size: 40px;
+  font-weight: 700;
+  color: #333;
+  line-height: 1.2;
+  background: transparent;
+}
+
+.note-title-input::placeholder {
+  color: #e0e0e0;
+}
+
+/* Make EditorJS container occupy remaining space and format clean */
+.editorjs-container {
+  min-height: 400px;
+  font-family: inherit;
+  font-size: 16px;
+  line-height: 1.6;
+  color: #37352f;
+}
+
+/* Customizing EditorJS styles mildly to look more seamless */
+::ng-deep .codex-editor__redactor {
+  padding-bottom: 150px !important;
+}
+
+::ng-deep .ce-block__content, 
+::ng-deep .ce-toolbar__content {
+  max-width: 800px;
+}

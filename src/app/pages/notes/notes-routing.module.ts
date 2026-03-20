@@ -18,6 +18,10 @@ const routes: Routes = [
     component: NoteDictionaryComponent
   },
   {
+    path: ':id',
+    loadComponent: () => import('./note-create/note-create.component').then(m => m.NoteCreateComponent)
+  },
+  {
     path: '',
     redirectTo: 'change-requests',
     pathMatch: 'full'

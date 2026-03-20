@@ -1,9 +1,11 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { PagetitleComponent } from 'src/app/shared/ui/pagetitle/pagetitle.component';
 import { ModalDirective, ModalModule } from 'ngx-bootstrap/modal';
 import { PaginationModule } from 'ngx-bootstrap/pagination';
+import { NoteService } from '../services/note.service';
 import Swal from 'sweetalert2';
 
 export interface Note {
@@ -29,6 +31,8 @@ export interface Note {
 export class NotesListComponent implements OnInit {
 
   breadCrumbItems: Array<{}>;
+
+  constructor(private router: Router, private noteService: NoteService) {}
 
   // Data
   notesList: Note[] = [];
@@ -83,109 +87,20 @@ export class NotesListComponent implements OnInit {
 
   loadMockData() {
     this.isLoading = true;
-    // Simulate API delay
-    setTimeout(() => {
-      this.notesList = [
-        {
-          id: 1,
-          title: 'Sprint Planning - Q1 2026',
-          content: 'Discussed feature priorities for Q1. Focus on account management improvements and project dashboard enhancements.',
-          projectName: 'Account Management',
-          type: 'meeting',
-          priority: 'high',
-          status: 'done',
-          createdBy: 'Hach NV',
-          createdAt: '2026-03-01T09:00:00Z',
-          updatedAt: '2026-03-01T11:30:00Z'
-        },
-        {
-          id: 2,
-          title: 'Add SSO Login Support',
-          content: 'Research and implement Single Sign-On (SSO) using OAuth2 / OpenID Connect for enterprise clients.',
-          projectName: 'Account Management',
-          type: 'feature',
-          priority: 'high',
-          status: 'in_progress',
-          createdBy: 'Hach NV',
-          createdAt: '2026-03-03T14:00:00Z',
-          updatedAt: '2026-03-10T16:00:00Z'
-        },
-        {
-          id: 3,
-          title: 'Modal z-index overlap issue',
-          content: 'The View Account Details modal appears behind the Project Details modal. Need to adjust z-index and backdrop configuration.',
-          projectName: 'Account Management',
-          type: 'bug',
-          priority: 'medium',
-          status: 'done',
-          createdBy: 'Hach NV',
-          createdAt: '2026-03-03T15:00:00Z',
-          updatedAt: '2026-03-03T17:00:00Z'
-        },
-        {
-          id: 4,
-          title: 'Stock data API integration',
-          content: 'Replicate vnstock Python API endpoints in Java for fetching historical prices and financial reports.',
-          projectName: 'AInvest',
-          type: 'feature',
-          priority: 'high',
-          status: 'open',
-          createdBy: 'Hach NV',
-          createdAt: '2026-03-02T10:00:00Z',
-          updatedAt: '2026-03-02T10:00:00Z'
-        },
-        {
-          id: 5,
-          title: 'Weekly team sync - Mar W2',
-          content: 'Reviewed deployment progress. Backend deployed on VPS 36.50.135.128. Frontend build pipeline to be set up next.',
-          projectName: 'Account Management',
-          type: 'meeting',
-          priority: 'low',
-          status: 'done',
-          createdBy: 'Hach NV',
-          createdAt: '2026-03-10T09:00:00Z',
-          updatedAt: '2026-03-10T10:00:00Z'
-        },
-        {
-          id: 6,
-          title: 'Dark mode theming idea',
-          content: 'Consider adding a dark mode toggle to the dashboard. Use CSS variables for easy theme switching.',
-          projectName: 'Account Management',
-          type: 'idea',
-          priority: 'low',
-          status: 'open',
-          createdBy: 'Hach NV',
-          createdAt: '2026-03-08T11:00:00Z',
-          updatedAt: '2026-03-08T11:00:00Z'
-        },
-        {
-          id: 7,
-          title: 'Optimize project list loading',
-          content: 'Implement server-side pagination and lazy loading for project list to improve performance with large datasets.',
-          projectName: 'Account Management',
-          type: 'task',
-          priority: 'medium',
-          status: 'open',
-          createdBy: 'Hach NV',
-          createdAt: '2026-03-09T14:00:00Z',
-          updatedAt: '2026-03-09T14:00:00Z'
-        },
-        {
-          id: 8,
-          title: 'Database schema review',
-          content: 'Review and document all entity relationships. Ensure proper indexing for frequently queried columns.',
-          projectName: 'AInvest',
-          type: 'task',
-          priority: 'medium',
-          status: 'in_progress',
-          createdBy: 'Hach NV',
-          createdAt: '2026-03-05T08:00:00Z',
-          updatedAt: '2026-03-11T09:00:00Z'
-        }
-      ];
-      this.applyFilter();
-      this.isLoading = false;
-    }, 500);
+    this.noteService.getNotes().subscribe({
+      next: (data) => {
+        this.notesList = data;
+        this.applyFilter();
+        this.isLoading = false;
+      },
+      error: (err) => {
+        console.error('Error fetching notes', err);
+        // Fallback to empty list or keep mock data if backend fails
+        this.notesList = [];
+        this.applyFilter();
+        this.isLoading = false;
+      }
+    });
   }
 
   onSearch() {
@@ -237,15 +152,44 @@ export class NotesListComponent implements OnInit {
     return this.statusOptions.find(s => s.value === status) || this.statusOptions[0];
   }
 
-  // View Note
+  // View Note -> direct to editor now
   viewNote(note: Note) {
-    this.selectedNote = note;
-    this.viewNoteModal?.show();
+    this.editNote(note);
   }
 
-  // Edit Note (placeholder)
+  // Edit Note
   editNote(note: Note) {
-    Swal.fire('Info', `Edit note: "${note.title}" - Coming soon!`, 'info');
+    if (note.id) {
+        this.router.navigate(['/notes', note.id]);
+    } else {
+        this.router.navigate(['/notes', 'new']);
+    }
+  }
+
+  getPlainText(content: string): string {
+    if (!content) return '';
+    if (!content.trim().startsWith('{')) return content; // Not JSON
+
+    try {
+      const parsed = JSON.parse(content);
+      if (parsed && parsed.blocks) {
+        return parsed.blocks.map((b: any) => {
+          if (b.type === 'paragraph' || b.type === 'header') {
+            return b.data.text.replace(/<[^>]*>?/gm, ''); // strip HTML tags
+          }
+          if (b.type === 'list') {
+            return b.data.items.join(' ').replace(/<[^>]*>?/gm, '');
+          }
+          if (b.type === 'checklist') {
+            return b.data.items.map((i: any) => i.text).join(' ').replace(/<[^>]*>?/gm, '');
+          }
+          return '';
+        }).filter((t: string) => t !== '').join(' ');
+      }
+    } catch (e) {
+      return content;
+    }
+    return '';
   }
 
   // Delete Note
@@ -260,16 +204,23 @@ export class NotesListComponent implements OnInit {
       confirmButtonText: 'Yes, delete it!'
     }).then((result) => {
       if (result.isConfirmed) {
-        this.notesList = this.notesList.filter(n => n.id !== note.id);
-        this.applyFilter();
-
-        const maxPage = Math.ceil(this.totalNotes / this.notesItemsPerPage) || 1;
-        if (this.notesPage > maxPage) {
-          this.notesPage = maxPage;
-          this.updatePagedNotes();
-        }
-
-        Swal.fire('Deleted!', 'Note has been deleted.', 'success');
+        this.noteService.deleteNote(note.id).subscribe({
+          next: () => {
+            this.notesList = this.notesList.filter(n => n.id !== note.id);
+            this.applyFilter();
+            
+            const maxPage = Math.ceil(this.totalNotes / this.notesItemsPerPage) || 1;
+            if (this.notesPage > maxPage) {
+              this.notesPage = maxPage;
+              this.updatePagedNotes();
+            }
+            Swal.fire('Deleted!', 'Note has been deleted.', 'success');
+          },
+          error: (err) => {
+            console.error('Error deleting note', err);
+            Swal.fire('Error!', 'Failed to delete note. Please try again.', 'error');
+          }
+        });
       }
     });
   }

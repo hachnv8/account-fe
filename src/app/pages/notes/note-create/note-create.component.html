@@ -1,0 +1,79 @@
+<div class="note-create-wrapper">
+  <!-- Top Action Bar -->
+  <div class="note-action-bar">
+    <div class="d-flex align-items-center">
+      <button class="btn btn-link text-muted p-0 me-3" (click)="goBack()" title="Back to Notes">
+        <i class="mdi mdi-arrow-left font-size-18"></i>
+      </button>
+      <div class="d-flex flex-column">
+        <span class="text-muted font-size-12">
+          @if(lastSavedAt) {
+            Saved at {{ lastSavedAt | date:'shortTime' }}
+          } @else {
+            Draft
+          }
+        </span>
+      </div>
+    </div>
+    <div class="d-flex gap-2">
+      <!-- Options dropdown / More Actions -->
+      <button class="btn btn-light btn-sm btn-rounded"><i class="mdi mdi-dots-horizontal"></i></button>
+      <button class="btn btn-primary btn-sm btn-rounded px-3" (click)="openSaveModal()" [disabled]="isSaving || !noteTitle.trim()">
+        @if(isSaving) {
+          <i class="bx bx-loader bx-spin me-1"></i> Saving
+        } @else {
+          <i class="mdi mdi-check-all me-1"></i> Save
+        }
+      </button>
+    </div>
+  </div>
+
+  <!-- Note Editor Container -->
+  <div class="note-editor-container">
+    <div class="note-editor-content">
+      
+      <!-- Optional Cover/Icon Area Simulation -->
+      <!-- <div class="note-cover pt-4 pb-2">
+        <button class="btn btn-light btn-sm rounded-pill"><i class="mdi mdi-image-outline me-1"></i> Add Cover</button>
+        <button class="btn btn-light btn-sm rounded-pill ms-2"><i class="mdi mdi-emoticon-outline me-1"></i> Add Icon</button>
+      </div> -->
+
+      <div class="note-title-wrapper mt-4">
+        <input 
+          type="text" 
+          class="note-title-input" 
+          placeholder="Untitled Note" 
+          [(ngModel)]="noteTitle"
+          autocomplete="off">
+      </div>
+
+      <div id="editorjs" class="editorjs-container mt-3"></div>
+      
+    </div>
+  </div>
+</div>
+
+<!-- Save Note Modal -->
+<div bsModal #saveNoteModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" [config]="{backdrop: 'static'}">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Save Note</h5>
+        <button type="button" class="btn-close" (click)="saveNoteModal.hide()"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label text-muted fw-semibold">Project</label>
+          <select class="form-select" [(ngModel)]="selectedProject">
+            <option value="General">General</option>
+            <option *ngFor="let p of projects" [value]="p.name">{{ p.name }}</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="saveNoteModal.hide()">Cancel</button>
+        <button type="button" class="btn btn-primary" (click)="executeSave()"><i class="mdi mdi-check-all me-1"></i> Confirm</button>
+      </div>
+    </div>
+  </div>
+</div>

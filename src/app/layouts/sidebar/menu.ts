@@ -37,6 +37,12 @@ export const MENU: MenuItem[] = [
             },
             {
                 id: 13,
+                label: 'New Note',
+                link: '/notes/new',
+                parentId: 10
+            },
+            {
+                id: 14,
                 label: 'MENUITEMS.NOTES.LIST.DICTIONARY',
                 link: '/notes/dictionary',
                 parentId: 10
