@@ -19,6 +19,31 @@ export const MENU: MenuItem[] = [
         link: '/project-manager'
     },
     {
+        id: 15,
+        label: 'MENUITEMS.TASKS.TEXT',
+        icon: 'bx-task',
+        subItems: [
+            {
+                id: 16,
+                label: 'MENUITEMS.TASKS.LIST.TASKLIST',
+                link: '/tasks/list',
+                parentId: 15
+            },
+            {
+                id: 17,
+                label: 'MENUITEMS.TASKS.LIST.KANBAN',
+                link: '/tasks/kanban',
+                parentId: 15
+            },
+            {
+                id: 18,
+                label: 'MENUITEMS.TASKS.LIST.CREATETASK',
+                link: '/tasks/create',
+                parentId: 15
+            }
+        ]
+    },
+    {
         id: 10,
         label: 'MENUITEMS.NOTES.TEXT',
         icon: 'bx-notepad',

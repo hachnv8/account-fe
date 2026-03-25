@@ -17,12 +17,12 @@
             </div>
           </div> <!-- end dropdown -->
 
-          <h4 class="card-title mb-4">Upcoming</h4>
-          <div id="upcoming-task" class="pb-1 task-list" dndDropzone dndEffectAllowed="move" (dndDrop)="onDrop($event, upcomingTasks,'upcoming-task')">
+          <h4 class="card-title mb-4">To Do</h4>
+          <div id="todo-task" class="pb-1 task-list" dndDropzone dndEffectAllowed="move" (dndDrop)="onDrop($event, todoTasks,'todo')">
             <div class="dndPlaceholder" dndPlaceholderRef></div>
-            @for(task of upcomingTasks;track $index){
+            @for(task of todoTasks;track $index){
             <ng-container>
-              <div [dndDraggable]="task" dndEffectAllowed="move" (dndMoved)="onDragged(task, upcomingTasks)">
+              <div [dndDraggable]="task" dndEffectAllowed="move" (dndMoved)="onDragged(task, todoTasks)">
                 <ng-template [ngTemplateOutlet]="TaskContent" [ngTemplateOutletContext]="{task:task, index: $index}">
                 </ng-template>
               </div>
@@ -30,7 +30,7 @@
             }
 
             <div class="text-center d-grid">
-              <a href="javascript: void(0);" class="btn btn-primary" (click)="addnewTask('upcoming')"><i class="mdi mdi-plus me-1"></i>
+              <a href="javascript: void(0);" class="btn btn-primary" (click)="addnewTask('todo')"><i class="mdi mdi-plus me-1"></i>
                 Add New</a>
             </div>
           </div>
@@ -52,19 +52,19 @@
             </div>
           </div> <!-- end dropdown -->
 
-          <h4 class="card-title mb-4">In Progress</h4>
-          <div id="Progress-task" class="pb-1 task-list" dndDropzone dndEffectAllowed="move" (dndDrop)="onDrop($event, inprogressTasks,'Progress-task')">
+          <h4 class="card-title mb-4">Doing</h4>
+          <div id="doing-task" class="pb-1 task-list" dndDropzone dndEffectAllowed="move" (dndDrop)="onDrop($event, doingTasks,'doing')">
             <div class="dndPlaceholder" dndPlaceholderRef></div>
-            @for(task of inprogressTasks;track $index){
+            @for(task of doingTasks;track $index){
             <ng-container>
-              <div [dndDraggable]="task" dndEffectAllowed="move" (dndMoved)="onDragged(task, inprogressTasks)">
-                <ng-template [ngTemplateOutlet]="TaskContent" [ngTemplateOutletContext]="{task:task, $index}">
+              <div [dndDraggable]="task" dndEffectAllowed="move" (dndMoved)="onDragged(task, doingTasks)">
+                <ng-template [ngTemplateOutlet]="TaskContent" [ngTemplateOutletContext]="{task:task, index: $index}">
                 </ng-template>
               </div>
             </ng-container>
             }
             <div class="text-center d-grid">
-              <a href="javascript: void(0);" class="btn btn-primary" (click)="addnewTask('inprogress')"><i class="mdi mdi-plus me-1"></i>
+              <a href="javascript: void(0);" class="btn btn-primary" (click)="addnewTask('doing')"><i class="mdi mdi-plus me-1"></i>
                 Add New</a>
             </div>
           </div>
@@ -85,20 +85,20 @@
             </div>
           </div> <!-- end dropdown -->
 
-          <h4 class="card-title mb-4">Completed</h4>
-          <div id="completed-task" class="pb-1 task-list" dndDropzone dndEffectAllowed="move" (dndDrop)="onDrop($event, completedTasks,'completed-task')">
+          <h4 class="card-title mb-4">Done</h4>
+          <div id="done-task" class="pb-1 task-list" dndDropzone dndEffectAllowed="move" (dndDrop)="onDrop($event, doneTasks,'done')">
             <div class="dndPlaceholder" dndPlaceholderRef></div>
-            @for(task of completedTasks;track $index){
+            @for(task of doneTasks;track $index){
             <ng-container>
-              <div [dndDraggable]="task" dndEffectAllowed="move" (dndMoved)="onDragged(task, completedTasks)">
-                <ng-template [ngTemplateOutlet]="TaskContent" [ngTemplateOutletContext]="{task:task,  $index}">
+              <div [dndDraggable]="task" dndEffectAllowed="move" (dndMoved)="onDragged(task, doneTasks)">
+                <ng-template [ngTemplateOutlet]="TaskContent" [ngTemplateOutletContext]="{task:task, index: $index}">
                 </ng-template>
               </div>
             </ng-container>
             }
 
             <div class="text-center d-grid">
-              <a href="javascript: void(0);" class="btn btn-primary" (click)="addnewTask('completed')"><i class="mdi mdi-plus me-1"></i>
+              <a href="javascript: void(0);" class="btn btn-primary" (click)="addnewTask('done')"><i class="mdi mdi-plus me-1"></i>
                 Add New</a>
             </div>
           </div>
@@ -123,35 +123,15 @@
       </div>
       <div class="float-end ms-2">
         <span class="badge rounded-pill badge-soft-secondary font-size-12" [ngClass]=" { 
-            'badge-soft-secondary': task.task === 'Waiting',
-            'badge-soft-success': task.task === 'Complete',
-            'badge-soft-primary': task.task === 'Approved',
-            'badge-soft-warning': task.task === 'Pending' }">{{task.task}}</span>
+            'badge-soft-secondary': task.status === 'todo',
+            'badge-soft-success': task.status === 'done',
+            'badge-soft-primary': task.status === 'doing' }">{{task.task}}</span>
       </div>
       <div>
-        <h5 class="font-size-15"><a href="javascript: void(0);" class="text-dark">{{task.title}}</a>
+        <h5 class="font-size-15 mb-3"><a href="javascript: void(0);" class="text-dark" (click)="updateTask(task)">{{task.title}}</a>
         </h5>
-        <p class="text-muted mb-4">{{task.date}}</p>
       </div>
 
-      <div class="avatar-group float-start">
-        <div class="avatar-group-item">
-          <a href="javascript: void(0);" class="d-inline-block">
-            <img src="{{ task.user[0]}}" class="rounded-circle avatar-xs" alt="">
-          </a>
-        </div>
-        @if(task.user[1]){
-        <div class="avatar-group-item">
-          <a href="javascript: void(0);" class="d-inline-block">
-            <img src="{{ task.user[1]}}" class="rounded-circle avatar-xs" alt="">
-          </a>
-        </div>}
-      </div>
-
-      <div class="text-end">
-        <h5 class="font-size-15 mb-1">$ {{task.budget}}</h5>
-        <p class="mb-0 text-muted">Budget</p>
-      </div>
     </div>
   </div>
 </ng-template>
@@ -160,8 +140,8 @@
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title add-task-title">Add New Task</h5>
-        <h5 class="modal-title update-task-title" style="display: none;">Update Task</h5>
+        <h5 class="modal-title add-task-title" *ngIf="!editId">Add New Task</h5>
+        <h5 class="modal-title update-task-title" *ngIf="editId">Update Task</h5>
         <button type="button" class="btn-close" (click)="modalForm.hide()"></button>
       </div>
       <div class="modal-body">
@@ -174,49 +154,70 @@
           </div>
           <div class="form-group mb-3">
             <label class="col-form-label">Task Description</label>
-            <div class="col-lg-12">
-              <textarea id="taskdesc" class="form-control" name="taskdesc" formControlName="taskdesc"></textarea>
+            <div class="col-lg-12 mb-3">
+              <div class="d-flex gap-2 mb-2">
+                <button type="button" class="btn btn-primary btn-sm rounded-pill px-3" (click)="uploadFile('image')">
+                  <i class="mdi mdi-image-outline me-1"></i> Photo
+                </button>
+                <button type="button" class="btn btn-light btn-sm rounded-pill px-3 border" (click)="uploadFile('file')">
+                  <i class="mdi mdi-file-outline me-1"></i> File
+                </button>
+              </div>
+              <input type="file" #fileInput (change)="onFileSelected($event)" style="display: none;" />
+              <ngx-editor-menu [editor]="editor"> </ngx-editor-menu>
+              <div class="editor-scroll-container">
+                <ngx-editor [editor]="editor" [(ngModel)]="html" [ngModelOptions]="{standalone: true}" [disabled]="false"
+                  [placeholder]="'Type here...'" (paste)="onPaste($event)"></ngx-editor>
+              </div>
             </div>
           </div>
 
+          <!-- Attachments Metadata List -->
+          @if (attachments.length > 0) {
           <div class="form-group mb-3">
-            <label class="col-form-label">Add Team Member<span class="text-danger">*</span></label>
-            <ul class="list-unstyled user-list validate" id="taskassignee">
-              @for(data of memberLists;track $index){
-              <li>
-                <div class="form-check form-check-primary mb-2 d-flex align-items-center">
-                  <input class="form-check-input" type="checkbox" [checked]="data.checked == true" (change)="selectMember($index)">
-                  <label class="form-check-label ms-2">{{data.name}}</label>
-                  <img src="{{data.profile}}" class="rounded-circle avatar-xs m-1" alt="">
-                </div>
-              </li>
-              }
-            </ul>
+            <div class="col-lg-12">
+              <div class="border rounded p-3 bg-light">
+                <h6 class="font-size-14 mb-3"><i class="mdi mdi-attachment me-2"></i>Attached Files ({{attachments.length}})</h6>
+                <ul class="list-unstyled mb-0">
+                  @for(file of attachments;track $index){
+                  <li class="d-flex align-items-center mb-2 last-child-mb-0">
+                    <div class="avatar-xs me-2">
+                      <span class="avatar-title bg-primary-subtle text-primary rounded">
+                        <i class="mdi mdi-file-outline"></i>
+                      </span>
+                    </div>
+                    <div class="flex-grow-1 overflow-hidden">
+                      <h5 class="font-size-13 text-truncate mb-0">{{file.name}}</h5>
+                      <p class="text-muted font-size-12 mb-0">{{file.size}}</p>
+                    </div>
+                    <div class="ms-2">
+                      <a href="javascript:void(0);" class="text-danger font-size-16" (click)="removeAttachment($index)">
+                        <i class="mdi mdi-trash-can-outline"></i>
+                      </a>
+                    </div>
+                  </li>
+                  }
+                </ul>
+              </div>
+            </div>
           </div>
+          }
 
           <div class="form-group mb-4">
-            <label class="col-form-label">Status<span class="text-danger">*</span></label>
+            <label class="col-form-label" for="TaskStatus">Status<span class="text-danger">*</span></label>
             <div class="col-lg-12">
-              <select class="form-select validate" id="TaskStatus" formControlName="task" required>
-                <option value="" selected>Choose..</option>
-                <option value="Waiting">Waiting</option>
-                <option value="Approved">Approved</option>
-                <option value="Pending">Pending</option>
-                <option value="Complete">Complete</option>
+              <select class="form-select validate" id="TaskStatus" formControlName="status" required>
+                <option value="" selected disabled>Choose..</option>
+                <option value="todo">To Do</option>
+                <option value="doing">Doing</option>
+                <option value="done">Done</option>
               </select>
             </div>
           </div>
-
-          <div class="form-group mb-4">
-            <label for="taskbudget" class="col-form-label">Budget<span class="text-danger">*</span></label>
-            <div class="col-lg-12">
-              <input id="taskbudget" name="taskbudget" type="number" placeholder="Enter Task Budget..." formControlName="budget" class="form-control" required>
-            </div>
-          </div>
           <div class="row">
-            <div class="col-lg-10">
-              <button type="submit" class="btn btn-primary" id="addtask">Create Task</button>
-              <!-- <button type="button" class="btn btn-primary d-none" id="updatetaskdetail">Update Task</button> -->
+            <div class="col-lg-12 text-end">
+              <button type="button" class="btn btn-light me-2" (click)="modalForm.hide()">Close</button>
+              <button type="submit" class="btn btn-primary" id="addtask">{{ editId ? 'Update Task' : 'Create Task' }}</button>
             </div>
           </div>
         </form>
