@@ -40,24 +40,24 @@ export class NoteCreateComponent implements OnInit, OnDestroy {
   projects: any[] = [];
   tasks: Task[] = [];
   selectedTaskId: number | null = null;
-  
+
   @ViewChild('saveNoteModal', { static: false }) saveNoteModal?: ModalDirective;
   @ViewChild('fileInput') fileInput!: ElementRef;
-  
+
   currentUploadType: 'image' | 'file' = 'image';
   attachments: any[] = [];
 
   constructor(
-    private router: Router, 
-    private route: ActivatedRoute, 
-    private noteService: NoteService, 
+    private router: Router,
+    private route: ActivatedRoute,
+    private noteService: NoteService,
     private accountService: AccountService,
     private taskService: TaskService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.editor = new Editor();
-    
+
     this.accountService.getProjects().subscribe({
       next: (data) => {
         this.projects = data || [];
@@ -96,11 +96,11 @@ export class NoteCreateComponent implements OnInit, OnDestroy {
         this.selectedTaskId = note.taskId || null;
         this.html = note.content || '';
         if (note.attachments) {
-            try {
-                this.attachments = JSON.parse(note.attachments);
-            } catch(e) {
-                this.attachments = [];
-            }
+          try {
+            this.attachments = JSON.parse(note.attachments);
+          } catch (e) {
+            this.attachments = [];
+          }
         }
       },
       error: (err: any) => {
@@ -188,7 +188,7 @@ export class NoteCreateComponent implements OnInit, OnDestroy {
 
   executeSave() {
     this.isSaving = true;
-    
+
     const noteToSave = {
       title: this.noteTitle,
       content: this.html,
@@ -201,31 +201,31 @@ export class NoteCreateComponent implements OnInit, OnDestroy {
     };
 
     if (this.noteId) {
-        this.noteService.updateNote(this.noteId, noteToSave).subscribe({
-          next: (res: any) => {
-            this.isSaving = false;
-            this.saveNoteModal?.hide();
-            this.router.navigate(['/notes/list']);
-          },
-          error: (err: any) => {
-            console.error('Update failed: ', err);
-            this.isSaving = false;
-            Swal.fire('Error', 'Failed to update note', 'error');
-          }
-        });
+      this.noteService.updateNote(this.noteId, noteToSave).subscribe({
+        next: (res: any) => {
+          this.isSaving = false;
+          this.saveNoteModal?.hide();
+          this.router.navigate(['/notes/list']);
+        },
+        error: (err: any) => {
+          console.error('Update failed: ', err);
+          this.isSaving = false;
+          Swal.fire('Error', 'Failed to update note', 'error');
+        }
+      });
     } else {
-        this.noteService.addNote(noteToSave).subscribe({
-          next: (res: any) => {
-            this.isSaving = false;
-            this.saveNoteModal?.hide();
-            this.router.navigate(['/notes/list']);
-          },
-          error: (err: any) => {
-            console.error('Saving failed: ', err);
-            this.isSaving = false;
-            Swal.fire('Error', 'Failed to save note', 'error');
-          }
-        });
+      this.noteService.addNote(noteToSave).subscribe({
+        next: (res: any) => {
+          this.isSaving = false;
+          this.saveNoteModal?.hide();
+          this.router.navigate(['/notes/list']);
+        },
+        error: (err: any) => {
+          console.error('Saving failed: ', err);
+          this.isSaving = false;
+          Swal.fire('Error', 'Failed to save note', 'error');
+        }
+      });
     }
   }
 

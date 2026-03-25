@@ -197,89 +197,84 @@
       </div>
       <div class="modal-body">
         <form [formGroup]="accountForm" (ngSubmit)="saveAccount()">
-            <div class="row">
-
-                <div class="col-md-6 mb-3">
-                    <label for="projectId" class="form-label">Project</label>
-                    <select class="form-select" id="projectId" formControlName="projectId" [ngClass]="{ 'is-invalid': submitted && f['projectId'].errors }">
-                        <option value="" disabled>Select a project</option>
-                        @for(p of projectList; track p) {
-                            <option [value]="p.id">{{p.name}}</option>
-                        }
-                    </select>
-                    @if(submitted && f['projectId'].errors) {
-                        <div class="invalid-feedback">Project is required</div>
-                    }
-                </div>
-
-                <div class="col-md-6 mb-3">
-                    <label for="name" class="form-label">Account Name</label>
-                    <input type="text" class="form-control" id="name" formControlName="name" placeholder="Ex: Facebook Ads"
-                        [ngClass]="{ 'is-invalid': submitted && f['name'].errors }" />
-                    @if(submitted && f['name'].errors) {
-                        <div class="invalid-feedback">Name is required</div>
-                    }
-                </div>
-
-                <div class="col-md-6 mb-3">
-                    <label for="url" class="form-label">Url / IP</label>
-                    <input type="text" class="form-control" id="url" formControlName="url" placeholder="Ex: business.facebook.com or 192.168.1.1"
-                        [ngClass]="{ 'is-invalid': submitted && f['url'].errors }" />
-                    @if(submitted && f['url'].errors) {
-                        <div class="invalid-feedback">Url is required</div>
-                    }
-                </div>
-
-                <div class="col-md-6 mb-3">
-                    <label for="platformIcon" class="form-label">Platform Type</label>
-                    <select class="form-select" id="platformIcon" formControlName="platformIcon">
-                        @for(platform of platformOptions; track platform.icon) {
-                            <option [value]="platform.icon">{{platform.name}}</option>
-                        }
-                    </select>
-                </div>
-
-
-
-                <div class="col-12 mt-3">
-                    <h5 class="card-title mb-3">Login Details</h5>
-                </div>
-
-                <div class="col-md-6 mb-3">
-                    <label for="username" class="form-label">Username / ID</label>
-                    <input type="text" class="form-control" id="username" formControlName="username" />
-                </div>
-
-                <div class="col-md-6 mb-3">
-                    <label for="password" class="form-label">Password / Token</label>
-                    <input type="text" class="form-control" id="password" formControlName="password" />
-                </div>
-
-                @if(needsPort) {
-                <div class="col-md-6 mb-3">
-                    <label for="port" class="form-label">Port</label>
-                    <input type="text" class="form-control" id="port" formControlName="port" placeholder="Ex: 22, 3306, 5432" />
-                </div>
-                } @else {
-                <div class="col-12 mb-3">
-                    <label for="notes" class="form-label">Notes / Additional Info</label>
-                    <textarea class="form-control" id="notes" formControlName="notes" rows="3"></textarea>
-                </div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="projectId" class="form-label">Project</label>
+              <select class="form-select" id="projectId" formControlName="projectId" [ngClass]="{ 'is-invalid': submitted && f['projectId'].errors }">
+                <option value="" disabled>Select a project</option>
+                @for(p of projectList; track p.id) {
+                <option [value]="p.id">{{p.name}}</option>
                 }
-
+              </select>
+              @if(submitted && f['projectId'].errors) {
+              <div class="invalid-feedback">Project is required</div>
+              }
             </div>
-
-            <div class="text-end mt-3">
-                <button type="button" class="btn btn-secondary me-2" (click)="addAccountModal.hide()">Cancel</button>
-                <button type="submit" class="btn btn-success">Save Account</button>
+            <div class="col-md-6 mb-3">
+              <label for="name" class="form-label">Account Name</label>
+              <input type="text" class="form-control" id="name" formControlName="name" placeholder="Ex: Facebook Ads" [ngClass]="{ 'is-invalid': submitted && f['name'].errors }" />
+              @if(submitted && f['name'].errors) {
+              <div class="invalid-feedback">Name is required</div>
+              }
             </div>
+            <div class="col-md-6 mb-3">
+              <label for="url" class="form-label">Url / IP</label>
+              <input type="text" class="form-control" id="url" formControlName="url" placeholder="Ex: business.facebook.com" [ngClass]="{ 'is-invalid': submitted && f['url'].errors }" />
+              @if(submitted && f['url'].errors) {
+              <div class="invalid-feedback">Url is required</div>
+              }
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="platformIcon" class="form-label">Platform Type</label>
+              <select class="form-select" id="platformIcon" formControlName="platformIcon">
+                @for(platform of platformOptions; track platform.icon) {
+                <option [value]="platform.icon">{{platform.name}}</option>
+                }
+              </select>
+            </div>
+            <div class="col-12 mt-3">
+              <h5 class="card-title mb-3">Login Details</h5>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="username" class="form-label">Username / ID</label>
+              <input type="text" class="form-control" id="username" formControlName="username" [ngClass]="{ 'is-invalid': submitted && f['username'].errors }" />
+              @if(submitted && f['username'].errors) {
+              <div class="invalid-feedback">Username is required</div>
+              }
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="password" class="form-label">Password / Token</label>
+              <input type="text" class="form-control" id="password" formControlName="password" [ngClass]="{ 'is-invalid': submitted && f['password'].errors }" />
+              @if(submitted && f['password'].errors) {
+              <div class="invalid-feedback">Password is required</div>
+              }
+            </div>
+            @if(needsPort) {
+            <div class="col-md-6 mb-3">
+              <label for="port" class="form-label">Port</label>
+              <input type="text" class="form-control" id="port" formControlName="port" placeholder="Ex: 22, 3306" />
+            </div>
+            }
+            @if(isDatabase) {
+            <div class="col-md-6 mb-3">
+              <label for="database" class="form-label">Database</label>
+              <input type="text" class="form-control" id="database" formControlName="database" placeholder="Ex: master, my_db" />
+            </div>
+            }
+            <div class="col-12 mb-3">
+              <label for="notes" class="form-label">Notes / Additional Info</label>
+              <textarea class="form-control" id="notes" formControlName="notes" rows="3"></textarea>
+            </div>
+          </div>
+          <div class="text-end mt-3">
+            <button type="button" class="btn btn-secondary me-2" (click)="addAccountModal.hide()">Cancel</button>
+            <button type="submit" class="btn btn-success">{{editingAccountId ? 'Update Account' : 'Save Account'}}</button>
+          </div>
         </form>
       </div>
     </div>
   </div>
 </div>
-
-
 
 <!-- Copy Account Modal -->
 <div bsModal #copyAccountModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="copyAccountModalLabel" aria-hidden="true">

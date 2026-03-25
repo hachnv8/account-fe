@@ -8,19 +8,20 @@
       <div class="d-flex flex-column">
         <span class="text-muted font-size-12">
           @if(lastSavedAt) {
-            Saved at {{ lastSavedAt | date:'shortTime' }}
+          Saved at {{ lastSavedAt | date:'shortTime' }}
           } @else {
-            Draft
+          Draft
           }
         </span>
       </div>
     </div>
     <div class="d-flex gap-2">
-      <button class="btn btn-primary btn-sm btn-rounded px-3" (click)="openSaveModal()" [disabled]="isSaving || !noteTitle.trim()">
+      <button class="btn btn-primary btn-sm btn-rounded px-3" (click)="openSaveModal()"
+        [disabled]="isSaving || !noteTitle.trim()">
         @if(isSaving) {
-          <i class="bx bx-loader bx-spin me-1"></i> Saving
+        <i class="bx bx-loader bx-spin me-1"></i> Saving
         } @else {
-          <i class="mdi mdi-check-all me-1"></i> Save
+        <i class="mdi mdi-check-all me-1"></i> Save
         }
       </button>
     </div>
@@ -29,7 +30,7 @@
   <!-- Note Editor Container -->
   <div class="note-editor-container">
     <div class="note-editor-content">
-      
+
       <!-- Optional Cover/Icon Area Simulation -->
       <!-- <div class="note-cover pt-4 pb-2">
         <button class="btn btn-light btn-sm rounded-pill"><i class="mdi mdi-image-outline me-1"></i> Add Cover</button>
@@ -37,11 +38,7 @@
       </div> -->
 
       <div class="note-title-wrapper mt-4">
-        <input 
-          type="text" 
-          class="note-title-input" 
-          placeholder="Untitled Note" 
-          [(ngModel)]="noteTitle"
+        <input type="text" class="note-title-input" placeholder="Untitled Note" [(ngModel)]="noteTitle"
           autocomplete="off">
       </div>
 
@@ -87,13 +84,14 @@
           </div>
         </div>
       </div>
-      
+
     </div>
   </div>
 </div>
 
 <!-- Save Note Modal -->
-<div bsModal #saveNoteModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" [config]="{backdrop: 'static'}">
+<div bsModal #saveNoteModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true"
+  [config]="{backdrop: 'static'}">
   <div class="modal-dialog modal-dialog-centered modal-sm">
     <div class="modal-content">
       <div class="modal-header">
@@ -117,12 +115,13 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" (click)="saveNoteModal.hide()" [disabled]="isSaving">Cancel</button>
+        <button type="button" class="btn btn-secondary" (click)="saveNoteModal.hide()"
+          [disabled]="isSaving">Cancel</button>
         <button type="button" class="btn btn-primary" (click)="executeSave()" [disabled]="isSaving">
           @if(isSaving) {
-            <i class="bx bx-loader bx-spin me-1"></i> Saving...
+          <i class="bx bx-loader bx-spin me-1"></i> Saving...
           } @else {
-            <i class="mdi mdi-check-all me-1"></i> Confirm
+          <i class="mdi mdi-check-all me-1"></i> Confirm
           }
         </button>
       </div>

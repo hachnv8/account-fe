@@ -198,6 +198,7 @@ export class AccountListComponent implements OnInit {
             username: [''],
             password: [''],
             port: [''],
+            database: [''],
             notes: ['']
         });
 
@@ -228,6 +229,14 @@ export class AccountListComponent implements OnInit {
         const currentIcon = this.accountForm?.get('platformIcon')?.value;
         const platform = this.platformOptions.find(p => p.icon === currentIcon);
         return platform?.needsPort ?? false;
+    }
+
+    /**
+     * Check if current platform is a database
+     */
+    get isDatabase(): boolean {
+        const currentIcon = this.accountForm?.get('platformIcon')?.value;
+        return currentIcon === 'bx bxs-data';
     }
 
     // Open Add modal
@@ -268,7 +277,11 @@ export class AccountListComponent implements OnInit {
         };
         if (this.needsPort) {
             loginDetails.port = formValues.port;
-        } else {
+        } 
+        if (this.isDatabase) {
+            loginDetails.database = formValues.database;
+        }
+        if (!this.needsPort) {
             loginDetails.notes = formValues.notes;
         }
 
@@ -527,6 +540,7 @@ export class AccountListComponent implements OnInit {
                 username: account.loginDetails?.username || '',
                 password: account.loginDetails?.password || '',
                 port: account.loginDetails?.port || '',
+                database: account.loginDetails?.database || '',
                 notes: account.loginDetails?.notes || ''
             }, { emitEvent: false });
             this.addAccountModal?.show();
