@@ -34,12 +34,6 @@ export const MENU: MenuItem[] = [
                 label: 'MENUITEMS.TASKS.LIST.KANBAN',
                 link: '/tasks/kanban',
                 parentId: 15
-            },
-            {
-                id: 18,
-                label: 'MENUITEMS.TASKS.LIST.CREATETASK',
-                link: '/tasks/create',
-                parentId: 15
             }
         ]
     },

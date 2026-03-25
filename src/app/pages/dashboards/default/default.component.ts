@@ -1,5 +1,5 @@
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
-import { emailSentBarChart, monthlyEarningChart } from './data';
+import { monthlyEarningChart } from './data';
 import { ChartType } from './dashboard.model';
 import { BsModalService, BsModalRef, ModalDirective, ModalModule } from 'ngx-bootstrap/modal';
 import { EventService } from '../../../core/services/event.service';
@@ -11,6 +11,7 @@ import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
 import { TransactionComponent } from 'src/app/shared/widget/transaction/transaction.component';
 import { LoaderComponent } from 'src/app/shared/ui/loader/loader.component';
 import { StatComponent } from 'src/app/shared/widget/stat/stat.component';
+import { TaskService } from 'src/app/core/services/task.service';
 
 @Component({
   selector: 'app-default',
@@ -22,7 +23,6 @@ export class DefaultComponent implements OnInit {
   modalRef?: BsModalRef;
   isVisible: string;
 
-  emailSentBarChart: ChartType;
   monthlyEarningChart: ChartType;
   transactions: any;
   statData: any;
@@ -32,10 +32,17 @@ export class DefaultComponent implements OnInit {
   };
 
   isActive: string;
+  totalTasks: number = 0;
+  completedTasks: number = 0;
 
   @ViewChild('content') content;
   @ViewChild('center', { static: false }) center?: ModalDirective;
-  constructor(private modalService: BsModalService, private configService: ConfigService, private eventService: EventService) {
+  constructor(
+    private modalService: BsModalService,
+    private configService: ConfigService,
+    private eventService: EventService,
+    private taskService: TaskService
+  ) {
   }
 
   ngOnInit() {
@@ -73,7 +80,6 @@ export class DefaultComponent implements OnInit {
    * Fetches the data
    */
   private fetchData() {
-    this.emailSentBarChart = emailSentBarChart;
     this.monthlyEarningChart = monthlyEarningChart;
 
     this.isActive = 'year';
@@ -81,53 +87,14 @@ export class DefaultComponent implements OnInit {
       this.transactions = data.transactions;
       this.statData = data.statData;
     });
+
+    this.taskService.getAllTasks().subscribe(tasks => {
+      this.totalTasks = tasks.length;
+      this.completedTasks = tasks.filter(t => t.status === 'done').length;
+    });
   }
   opencenterModal(template: TemplateRef<any>) {
     this.modalRef = this.modalService.show(template);
-  }
-  weeklyreport() {
-    this.isActive = 'week';
-    this.emailSentBarChart.series =
-      [{
-        name: 'Series A',
-        data: [44, 55, 41, 67, 22, 43, 36, 52, 24, 18, 36, 48]
-      }, {
-        name: 'Series B',
-        data: [11, 17, 15, 15, 21, 14, 11, 18, 17, 12, 20, 18]
-      }, {
-        name: 'Series C',
-        data: [13, 23, 20, 8, 13, 27, 18, 22, 10, 16, 24, 22]
-      }];
-  }
-
-  monthlyreport() {
-    this.isActive = 'month';
-    this.emailSentBarChart.series =
-      [{
-        name: 'Series A',
-        data: [44, 55, 41, 67, 22, 43, 36, 52, 24, 18, 36, 48]
-      }, {
-        name: 'Series B',
-        data: [13, 23, 20, 8, 13, 27, 18, 22, 10, 16, 24, 22]
-      }, {
-        name: 'Series C',
-        data: [11, 17, 15, 15, 21, 14, 11, 18, 17, 12, 20, 18]
-      }];
-  }
-
-  yearlyreport() {
-    this.isActive = 'year';
-    this.emailSentBarChart.series =
-      [{
-        name: 'Series A',
-        data: [13, 23, 20, 8, 13, 27, 18, 22, 10, 16, 24, 22]
-      }, {
-        name: 'Series B',
-        data: [11, 17, 15, 15, 21, 14, 11, 18, 17, 12, 20, 18]
-      }, {
-        name: 'Series C',
-        data: [44, 55, 41, 67, 22, 43, 36, 52, 24, 18, 36, 48]
-      }];
   }
 
 

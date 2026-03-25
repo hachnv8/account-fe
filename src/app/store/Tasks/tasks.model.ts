@@ -5,4 +5,5 @@ export interface Task {
     task: string;
     status: string;
     attachments?: string;
+    createdAt?: string;
 }

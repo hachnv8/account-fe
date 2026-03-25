@@ -13,10 +13,6 @@ const routes: Routes = [
     {
         path: 'kanban',
         component: KanbanboardComponent
-    },
-    {
-        path: 'create',
-        component: CreatetaskComponent
     }
 ];
 

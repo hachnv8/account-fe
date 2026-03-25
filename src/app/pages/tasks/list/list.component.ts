@@ -90,6 +90,7 @@ export class ListComponent implements OnInit, OnDestroy {
       next: (data) => {
         this.tasksList = data;
         this.applyFilter();
+        this.updateChartData();
         this.isLoading = false;
       },
       error: (err) => {
@@ -97,6 +98,46 @@ export class ListComponent implements OnInit, OnDestroy {
         this.isLoading = false;
       }
     });
+  }
+
+  updateChartData() {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const allTasksData = new Array(12).fill(0);
+    const completeTasksData = new Array(12).fill(0);
+
+    const currentYear = new Date().getFullYear();
+
+    this.tasksList.forEach(task => {
+      if (task.createdAt) {
+        const date = new Date(task.createdAt);
+        if (date.getFullYear() === currentYear) {
+          const monthIndex = date.getMonth();
+          if (monthIndex >= 0 && monthIndex < 12) {
+            allTasksData[monthIndex]++;
+            if (task.status === 'done') {
+              completeTasksData[monthIndex]++;
+            }
+          }
+        }
+      }
+    });
+
+    this.taskChart = {
+      ...this.taskChart,
+      series: [
+        {
+          name: 'Complete Tasks',
+          type: 'column',
+          data: completeTasksData
+        },
+        {
+          name: 'All Tasks',
+          type: 'line',
+          data: allTasksData
+        }
+      ],
+      labels: months
+    };
   }
 
   onSearch() {
