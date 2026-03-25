@@ -59,6 +59,7 @@
                   <th scope="col" style="width: 40px;">#</th>
                   <th scope="col">Title</th>
                   <th scope="col">Project</th>
+                  <th scope="col">Task</th>
                   <th scope="col">Created By</th>
                   <th scope="col">Created At</th>
                   <th scope="col" style="width: 130px;">Action</th>
@@ -75,15 +76,20 @@
                     </div>
                   </td>
                   <td>
-                    <h5 class="font-size-14 mb-1">
+                    <h5 class="font-size-14 mb-0">
                       <a href="javascript:void(0);" class="text-dark" (click)="editNote(note)">{{note.title}}</a>
                     </h5>
-                    <p class="text-muted mb-0 text-truncate" style="max-width: 280px;">{{getPlainText(note.content)}}</p>
                   </td>
                   <td>
                     <span class="badge bg-primary-subtle text-primary font-size-11">
                       <i class="bx bxs-folder me-1"></i>{{note.projectName}}
                     </span>
+                  </td>
+                  <td>
+                    <span class="badge bg-info-subtle text-info font-size-11" *ngIf="note.taskId">
+                      <i class="bx bx-task me-1"></i>{{ getTaskName(note.taskId) }}
+                    </span>
+                    <span class="text-muted font-size-11" *ngIf="!note.taskId">N/A</span>
                   </td>
                   <td>{{note.createdBy}}</td>
                   <td>{{note.createdAt | date:'mediumDate'}}</td>

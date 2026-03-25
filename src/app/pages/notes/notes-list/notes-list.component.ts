@@ -6,6 +6,8 @@ import { PagetitleComponent } from 'src/app/shared/ui/pagetitle/pagetitle.compon
 import { ModalDirective, ModalModule } from 'ngx-bootstrap/modal';
 import { PaginationModule } from 'ngx-bootstrap/pagination';
 import { NoteService } from '../services/note.service';
+import { TaskService } from 'src/app/core/services/task.service';
+import { Task } from 'src/app/store/Tasks/tasks.model';
 import Swal from 'sweetalert2';
 
 export interface Note {
@@ -19,6 +21,7 @@ export interface Note {
   createdBy: string;
   createdAt: string;
   updatedAt: string;
+  taskId?: number;
 }
 
 @Component({
@@ -31,8 +34,9 @@ export interface Note {
 export class NotesListComponent implements OnInit {
 
   breadCrumbItems: Array<{}>;
+  tasksList: Task[] = [];
 
-  constructor(private router: Router, private noteService: NoteService) {}
+  constructor(private router: Router, private noteService: NoteService, private taskService: TaskService) {}
 
   // Data
   notesList: Note[] = [];
@@ -82,7 +86,25 @@ export class NotesListComponent implements OnInit {
 
   ngOnInit(): void {
     this.breadCrumbItems = [{ label: 'Notes' }, { label: 'Notes List', active: true }];
+    this.loadTasks();
     this.loadMockData();
+  }
+
+  loadTasks() {
+    this.taskService.getAllTasks().subscribe({
+      next: (data) => {
+        this.tasksList = data;
+      },
+      error: (err) => {
+        console.error('Error fetching tasks for mapping', err);
+      }
+    });
+  }
+
+  getTaskName(taskId: any): string {
+    if (!taskId) return 'N/A';
+    const task = this.tasksList.find(t => String(t.id) === String(taskId));
+    return task ? task.title : 'Unknown Task';
   }
 
   loadMockData() {

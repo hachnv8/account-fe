@@ -43,21 +43,9 @@ export const MENU: MenuItem[] = [
         icon: 'bx-notepad',
         subItems: [
             {
-                id: 11,
-                label: 'MENUITEMS.NOTES.LIST.CHANGE_REQUESTS',
-                link: '/notes/change-requests',
-                parentId: 10
-            },
-            {
                 id: 12,
                 label: 'MENUITEMS.NOTES.LIST.NOTES',
                 link: '/notes/list',
-                parentId: 10
-            },
-            {
-                id: 13,
-                label: 'New Note',
-                link: '/notes/new',
                 parentId: 10
             },
             {

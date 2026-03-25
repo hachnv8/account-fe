@@ -22,11 +22,12 @@
   border-top-right-radius: 4px;
 }
 
+/* Note Editor Container Adjustments */
 .note-editor-container {
   flex: 1;
   display: flex;
   justify-content: center;
-  padding: 40px 0;
+  padding: 20px 0;
   overflow-y: auto;
 }
 
@@ -37,8 +38,7 @@
 }
 
 .note-title-wrapper {
-  margin-bottom: 20px;
-  padding-left: 56px; /* Align with EditorJS block text */
+  margin-bottom: 30px;
 }
 
 .note-title-input {
@@ -56,21 +56,56 @@
   color: #e0e0e0;
 }
 
-/* Make EditorJS container occupy remaining space and format clean */
-.editorjs-container {
+/* NGX-EDITOR STYLES */
+.ngx-editor-wrapper {
+  border: 1px solid #e9e9ef;
+  border-radius: 8px;
+  background: #fff;
+  overflow: hidden;
+}
+
+::ng-deep .NgxEditor {
   min-height: 400px;
-  font-family: inherit;
+  max-height: 700px;
+  overflow-y: auto;
+  padding: 20px;
+  background: white;
+}
+
+::ng-deep .NgxEditor__Content {
+  font-family: 'Inter', sans-serif;
   font-size: 16px;
   line-height: 1.6;
-  color: #37352f;
 }
 
-/* Customizing EditorJS styles mildly to look more seamless */
-::ng-deep .codex-editor__redactor {
-  padding-bottom: 150px !important;
+::ng-deep .NgxEditor__MenuBar {
+  background: #f8f9fa;
+  border-bottom: 1px solid #e9e9ef;
+  padding: 8px;
 }
 
-::ng-deep .ce-block__content, 
-::ng-deep .ce-toolbar__content {
-  max-width: 800px;
+/* Editor Actions */
+.editor-actions .btn-light {
+  border: 1px solid #e9e9ef;
+  font-weight: 500;
+  color: #495057;
+}
+
+.editor-actions .btn-light:hover {
+  background: #f1f1f1;
+}
+
+/* Attachments */
+.attachments-section h6 {
+  color: #495057;
+  font-weight: 600;
+}
+
+.attachments-section .card {
+  transition: all 0.2s ease-in-out;
+}
+
+.attachments-section .card:hover {
+  border-color: #556ee6 !important;
+  background-color: #fbfbfb;
 }
